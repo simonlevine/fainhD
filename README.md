@@ -1,4 +1,5 @@
 # 03-713, S21
+![workflow.png](workflow.png)
 ## Pipeline
 1. Filter RNA-seq data to remove host sequences
 2. Assemble unknown sequences into contigs
