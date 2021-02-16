@@ -45,25 +45,17 @@ rule star_se: #single-end
         "0.72.0/bio/star/align"
 
 
-
-# rule samtools_sort:
-#     input:
-#         "mapped_reads/{sample}.bam"
-#     output:
-#         "sorted_reads/{sample}.bam"
-#     shell:
-#         "samtools sort -T sorted_reads/{wildcards.sample} "
-#         "-O bam {input} > {output}"
-
-
-# rule samtools_index:
-#     input:
-#         "sorted_reads/{sample}.bam"
-#     output:
-#         "sorted_reads/{sample}.bam.bai"
-#     shell:
-#         "samtools index {input}"
-
+rule extract_unmapped_reads:
+    input:
+        "./output/alignment/{sample}/Aligned.out.sam"
+    output:
+        "./output/filtering/{sample}/nonhost_sequences.sam"
+    params:
+        # '4' is the flag for unmapped reads
+        # see: http://www.htslib.org/doc/samtools.html
+        "-f 4"
+    wrapper:
+        "0.72.0/bio/samtools/view" 
 
 # rule bcftools_call:
 #     input:

@@ -1,9 +1,0 @@
-Building DAG of jobs...
-MissingInputException in line 7 of /Users/simon/GitHub/bioinformatics-project/Snakefile:
-Missing input files for rule bwa_map:
-genome.fa.sa
-genome.fa.amb
-samples/A.fastq
-genome.fa.bwt
-genome.fa.pac
-genome.fa.ann
