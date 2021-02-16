@@ -47,17 +47,17 @@ rule star_se: #single-end
         "0.72.0/bio/star/align"
 
 
-# rule extract_unmapped_reads:
-#     input:
-#         "./output/alignment/{sample}/Aligned.out.sam"
-#     output:
-#         "./output/filtering/{sample}/nonhost_sequences.sam"
-#     params:
-#         # '4' is the flag for unmapped reads
-#         # see: http://www.htslib.org/doc/samtools.html
-#         "-f 4"
-#     wrapper:
-#         "0.72.0/bio/samtools/view" 
+rule extract_unmapped_reads:
+    input:
+        "./output/alignment/{sample}/Aligned.out.sam"
+    output:
+        "./output/filtering/{sample}/nonhost_sequences.sam"
+    params:
+        # '4' is the flag for unmapped reads
+        # see: http://www.htslib.org/doc/samtools.html
+        "-f 4"
+    wrapper:
+        "0.72.0/bio/samtools/view" 
 
 # rule bcftools_call:
 #     input:
