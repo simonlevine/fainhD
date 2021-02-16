@@ -1,4 +1,4 @@
-# 03-713 Bioinformatics Practicum, Carnegie Mellon University, Sprint 2021
+# 03-713 Bioinformatics Practicum, Carnegie Mellon University, Spring 2021
 ## Jeremy Fisher, Simon Levine, Sid Reed, Tomas Matteson
 ## Pipeline
 
