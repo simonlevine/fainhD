@@ -1,19 +1,43 @@
 SAMPLES = ["A", "B"]
 
 
-# rule all:
-#     input:
-#         "plots/quals.svg"
-
-rule bwa_map:
+rule star_pe_multi:
     input:
-        "data/genome.fa",
-        "data/samples/{sample}.fastq"
+        # use a list for multiple fastq files for one sample
+        # usually technical replicates across lanes/flowcells
+        fq1 = ["./input/alignment/reads/{sample}_R1.1.fastq", "reads/{sample}_R1.2.fastq"],
+        # paired end reads needs to be ordered so each item in the two lists match
+        fq2 = ["./input/alignment/reads/{sample}_R2.1.fastq", "reads/{sample}_R2.2.fastq"] #optional
     output:
-        "mapped_reads/{sample}.bam"
-    shell:
-        "bwa mem {input} | samtools view -Sb - > {output}"
+        # see STAR manual for additional output files
+        "star/pe/{sample}/Aligned.out.sam"
+    log:
+        "logs/star/pe/{sample}.log"
+    params:
+        # path to STAR reference genome index
+        index="./input/alignment/index",
+        # optional parameters
+        extra=""
+    threads: 8
+    wrapper:
+        "0.72.0/bio/star/align"
 
+rule star_se:
+    input:
+        fq1 = "./input/alignment/reads/{sample}_R1.1.fastq"
+    output:
+        # see STAR manual for additional output files
+        "star/{sample}/Aligned.out.sam"
+    log:
+        "logs/star/{sample}.log"
+    params:
+        # path to STAR reference genome index
+        index="index",
+        # optional parameters
+        extra=""
+    threads: 8
+    wrapper:
+        "0.72.0/bio/star/align"
 
 rule samtools_sort:
     input:
