@@ -46,7 +46,6 @@ rule star_se: #single-end
     wrapper:
         "0.72.0/bio/star/align"
 
-
 rule extract_unmapped_reads:
     input:
         "./output/alignment/{sample}/Aligned.out.sam"
@@ -58,3 +57,42 @@ rule extract_unmapped_reads:
         "-f 4"
     wrapper:
         "0.72.0/bio/samtools/view" 
+
+rule convert_sam_to_fastq:
+    input:
+        "./output/filtering/{sample}/nonhost_sequences.sam"
+    output:
+        "./output/filtering/{sample}/nonhost_sequences.fastq"
+    shell:
+        # see: https://www.cureffi.org/2013/07/04/how-to-convert-sam-to-fastq-with-unix-command-line-tools/
+        """grep -v ^@ | awk '{print "@"$1"\n"$10"\n+\n"$11}' < {input} > {output}"""
+
+rule contig_assembly:
+    input: 
+        "./output/filtering/{sample}/nonhost_sequences.fastq"
+    output:
+        directory("./output/contigs/{sample}")
+    conda:
+        "environment.yaml"
+    shell:
+        "spades.py --rna --s1 {input} -o {output}"
+
+# rule bcftools_call:
+#     input:
+#         fa="data/genome.fa",
+#         bam=expand("sorted_reads/{sample}.bam", sample=SAMPLES),
+#         bai=expand("sorted_reads/{sample}.bam.bai", sample=SAMPLES)
+#     output:
+#         "calls/all.vcf"
+#     shell:
+#         "samtools mpileup -g -f {input.fa} {input.bam} | "
+#         "bcftools call -mv - > {output}"
+
+
+# rule plot_quals:
+#     input:
+#         "calls/all.vcf"
+#     output:
+#         "plots/quals.svg"
+#     script:
+#         "scripts/plot-quals.py"
