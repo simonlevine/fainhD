@@ -1,13 +1,12 @@
-SAMPLES = ["A", "B"]
 
 
 rule star_pe_multi:
     input:
         # use a list for multiple fastq files for one sample
         # usually technical replicates across lanes/flowcells
-        fq1 = ["./input/alignment/reads/{sample}_R1.1.fastq", "reads/{sample}_R1.2.fastq"],
+        fq1 = ["./input/alignment/reads/{sample}_R1.1.fastq", "./input/alignmentreads/{sample}_R1.2.fastq"],
         # paired end reads needs to be ordered so each item in the two lists match
-        fq2 = ["./input/alignment/reads/{sample}_R2.1.fastq", "reads/{sample}_R2.2.fastq"] #optional
+        fq2 = ["./input/alignment/reads/{sample}_R2.1.fastq", "./input/alignmentreads/{sample}_R2.2.fastq"] #optional
     output:
         # see STAR manual for additional output files
         "star/pe/{sample}/Aligned.out.sam"
@@ -27,9 +26,10 @@ rule star_se:
         fq1 = "./input/alignment/reads/{sample}_R1.1.fastq"
     output:
         # see STAR manual for additional output files
-        "star/{sample}/Aligned.out.sam"
+        "./output/alignment/{sample}/Aligned.out.sam" #alignments in standard SAM format
+        
     log:
-        "logs/star/{sample}.log"
+        "./output/logs/star/{sample}.log"
     params:
         # path to STAR reference genome index
         index="index",
@@ -38,6 +38,9 @@ rule star_se:
     threads: 8
     wrapper:
         "0.72.0/bio/star/align"
+
+
+
 
 rule samtools_sort:
     input:
