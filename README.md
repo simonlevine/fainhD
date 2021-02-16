@@ -1,3 +1,12 @@
+# 03-713, S21
+## Stages
+1. Filter RNA-seq data to remove host sequences
+2. Assemble unknown sequences into contigs
+3. BLAST virus sequences against known viruses
+4. Predict functional ORFs in viral sequences
+5. Search for structural elements in virus sequences
+
+
 # Example data for the Snakemake tutorial
 
 This repository hosts the data needed for the [Snakemake tutorial](https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html).
