@@ -22,10 +22,11 @@
 #     wrapper:
 #         "0.72.0/bio/star/align"
 
+
 rule star_se: #single-end
     input:
         # fq1 = "./input/alignment/reads/{sample}_R1.1.fastq"
-        fq1 = 'data/sample_sequence.fq'
+        fq1 = 'input/alignment/reads/novel/sample_sequence.fq'
 
     output:
         # see STAR manual for additional output files
@@ -35,27 +36,28 @@ rule star_se: #single-end
         "./output/logs/star/sample.log"
     params:
         # path to STAR reference genome index
-        index="index",
+        index="input/reference",
         # optional parameters
         # extra=""
         extra="--outSAMunmapped Within"
+
 
     threads: 8
     wrapper:
         "0.72.0/bio/star/align"
 
 
-rule extract_unmapped_reads:
-    input:
-        "./output/alignment/{sample}/Aligned.out.sam"
-    output:
-        "./output/filtering/{sample}/nonhost_sequences.sam"
-    params:
-        # '4' is the flag for unmapped reads
-        # see: http://www.htslib.org/doc/samtools.html
-        "-f 4"
-    wrapper:
-        "0.72.0/bio/samtools/view" 
+# rule extract_unmapped_reads:
+#     input:
+#         "./output/alignment/{sample}/Aligned.out.sam"
+#     output:
+#         "./output/filtering/{sample}/nonhost_sequences.sam"
+#     params:
+#         # '4' is the flag for unmapped reads
+#         # see: http://www.htslib.org/doc/samtools.html
+#         "-f 4"
+#     wrapper:
+#         "0.72.0/bio/samtools/view" 
 
 # rule bcftools_call:
 #     input:

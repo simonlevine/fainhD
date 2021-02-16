@@ -12,6 +12,6 @@ dependencies:
   - samtools =1.9
   - bwa =0.7
   - pysam =0.15
-  - star==2.7.5c
+  - star==2.7.1a #Critical for use with provided STAR index
   - samtools
 
