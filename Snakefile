@@ -11,7 +11,7 @@ rule all:
 
 rule star_index:
     input:
-        fasta = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.dna.primary_assembly.fa")
+        fasta = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.dna.primary_assembly.fa"),
         gtf = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.99.gtf")
     output:
         directory("data/raw/reference_genome"),
@@ -21,7 +21,7 @@ rule star_index:
     params:
         extra = ""
     log:
-        "logs/star_index_{genome}.log"
+        "logs/star_index.log"
     wrapper:
         "0.72.0/bio/star/index"
 
@@ -35,7 +35,7 @@ rule star_single_ended:
         "logs/star/{sample}.log"
     params:
         # path to STAR reference genome index
-        index=star_index.output[0],
+        index="data/raw/reference_genome",
         extra="--outSAMunmapped Within"
     threads: 8
     wrapper:
