@@ -24,6 +24,7 @@ rule download_genome:
 rule star_index:
     input:
         fasta = "data/raw/reference_genome/{genome}.fa"
+        gtf = 'data/raw/reference_genome/{gtf}.gtf'
     output:
         directory("{genome}")
     message:
@@ -31,7 +32,7 @@ rule star_index:
     threads:
         1
     params:
-        extra = "{gtf}"
+        extra = ""
     log:
         "logs/star_index_{genome}.log"
     wrapper:
