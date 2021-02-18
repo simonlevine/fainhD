@@ -12,8 +12,7 @@ rule all:
 rule download_genome:
     input:
         [HTTP.remote(f"{reference_genome_url_prefix}/{f}", keep_local=True)
-         for f in ['chrLength.txt', 'chrName.txt', 'chrStart.txt', 'Genome',
-                   'genomeParameters.txt', 'SA', 'SAindex']]
+         for f in ['Homo_sapiens.GRCh38.99.gtf', 'Homo_sapiens.GRCh38.dna.primary_assembly.fa']]
     output:
         outdir=directory("data/raw/reference_genome"),
         download_complete_flag="data/raw/reference_genome/DOWNLOAD_COMPLETE.txt"
@@ -21,6 +20,22 @@ rule download_genome:
         for f in input:
             shell("mv {f} {output.outdir}")
         shell("touch {output.download_complete_flag}")
+
+rule star_index:
+    input:
+        fasta = "data/raw/reference_genome/{genome}.fa"
+    output:
+        directory("{genome}")
+    message:
+        "Running STAR index"
+    threads:
+        1
+    params:
+        extra = ""
+    log:
+        "logs/star_index_{genome}.log"
+    wrapper:
+        "0.72.0/bio/star/index"
 
 rule star_single_ended:
     input: 
