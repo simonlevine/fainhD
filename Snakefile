@@ -14,7 +14,8 @@ rule star_index:
         fasta = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.dna.primary_assembly.fa")
         gtf = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.99.gtf")
     output:
-        directory("{genome}")
+        directory("{genome}"),
+        touch("data/raw/reference_genome/INDEXING_COMPLETE.txt")
     message:
         "Running STAR index"
     params:
@@ -26,7 +27,7 @@ rule star_index:
 
 rule star_single_ended:
     input: 
-        "data/raw/reference_genome/DOWNLOAD_COMPLETE.txt",
+        "data/raw/reference_genome/INDEXING_COMPLETE.txt",
         fq1 = "data/raw/{sample}.fq"
     output:
         "data/interim/{sample}_aligned_to_human_genome.sam"
@@ -34,7 +35,7 @@ rule star_single_ended:
         "logs/star/{sample}.log"
     params:
         # path to STAR reference genome index
-        index="data/raw/reference_genome",
+        index=star_index.output[0],
         extra="--outSAMunmapped Within"
     threads: 8
     wrapper:
