@@ -9,22 +9,10 @@ reference_genome_url_prefix = config["reference_genome_url_prefix"]
 rule all:
     input: "data/interim/demo_aligned_to_human_genome.sam"
 
-rule download_genome:
-    input:
-        [HTTP.remote(f"{reference_genome_url_prefix}/{f}", keep_local=True)
-         for f in ['Homo_sapiens.GRCh38.99.gtf', 'Homo_sapiens.GRCh38.dna.primary_assembly.fa']]
-    output:
-        outdir=directory("data/raw/reference_genome"),
-        download_complete_flag="data/raw/reference_genome/DOWNLOAD_COMPLETE.txt"
-    run:
-        for f in input:
-            shell("mv {f} {output.outdir}")
-        shell("touch {output.download_complete_flag}")
-
 rule star_index:
     input:
-        fasta = "data/raw/reference_genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
-        gtf = 'data/raw/reference_genome/Homo_sapiens.GRCh38.99.gtf'
+        fasta = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.dna.primary_assembly.fa")
+        gtf = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.99.gtf")
     output:
         directory("{genome}")
     message:
