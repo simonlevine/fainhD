@@ -31,7 +31,7 @@ rule star_index:
     threads:
         1
     params:
-        extra = ""
+        extra = "{gtf}"
     log:
         "logs/star_index_{genome}.log"
     wrapper:
