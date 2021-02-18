@@ -23,14 +23,12 @@ rule download_genome:
 
 rule star_index:
     input:
-        fasta = "data/raw/reference_genome/{genome}.fa"
-        gtf = 'data/raw/reference_genome/{gtf}.gtf'
+        fasta = "data/raw/reference_genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+        gtf = 'data/raw/reference_genome/Homo_sapiens.GRCh38.99.gtf'
     output:
         directory("{genome}")
     message:
         "Running STAR index"
-    threads:
-        1
     params:
         extra = ""
     log:
@@ -88,4 +86,3 @@ rule contig_assembly:
         "spades.py --rna --s1 {input} -o {params.workdir} "
         "&& mv {params.workdir}/contigs.fasta {output} "
         "&& rm -rf {params.workdir}"
-
