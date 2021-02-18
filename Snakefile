@@ -9,22 +9,25 @@ reference_genome_url_prefix = config["reference_genome_url_prefix"]
 rule all:
     input: "data/interim/demo_aligned_to_human_genome.sam"
 
-rule download_genome:
+rule star_index:
     input:
-        [HTTP.remote(f"{reference_genome_url_prefix}/{f}", keep_local=True)
-         for f in ['chrLength.txt', 'chrName.txt', 'chrStart.txt', 'Genome',
-                   'genomeParameters.txt', 'SA', 'SAindex']]
+        fasta = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.dna.primary_assembly.fa"),
+        gtf = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.99.gtf")
     output:
-        outdir=directory("data/raw/reference_genome"),
-        download_complete_flag="data/raw/reference_genome/DOWNLOAD_COMPLETE.txt"
-    run:
-        for f in input:
-            shell("mv {f} {output.outdir}")
-        shell("touch {output.download_complete_flag}")
+        directory("data/raw/reference_genome"),
+        touch("data/raw/reference_genome/INDEXING_COMPLETE.txt")
+    message:
+        "Running STAR index"
+    params:
+        extra = ""
+    log:
+        "logs/star_index.log"
+    wrapper:
+        "0.72.0/bio/star/index"
 
 rule star_single_ended:
     input: 
-        "data/raw/reference_genome/DOWNLOAD_COMPLETE.txt",
+        "data/raw/reference_genome/INDEXING_COMPLETE.txt",
         fq1 = "data/raw/{sample}.fq"
     output:
         "data/interim/{sample}_aligned_to_human_genome.sam"
@@ -72,4 +75,3 @@ rule contig_assembly:
         "spades.py --rna --s1 {input} -o {params.workdir} "
         "&& mv {params.workdir}/contigs.fasta {output} "
         "&& rm -rf {params.workdir}"
-
