@@ -14,7 +14,7 @@ rule star_index:
         fasta = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.dna.primary_assembly.fa")
         gtf = HTTP.remote(f"{reference_genome_url_prefix}/Homo_sapiens.GRCh38.99.gtf")
     output:
-        directory("{genome}"),
+        directory("data/raw/reference_genome"),
         touch("data/raw/reference_genome/INDEXING_COMPLETE.txt")
     message:
         "Running STAR index"
