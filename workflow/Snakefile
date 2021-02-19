@@ -6,7 +6,7 @@ subworkflow filter_out_nonhost:
 
 rule contig_assembly:
     input: 
-        filter_out_nonhost("data/interim/{sample}_nonhost.fq")
+        filter_out_nonhost("../data/interim/{sample}_nonhost.fq")
     output:
         "data/interim/{sample}_nonhost_contigs.fasta"
     params:
