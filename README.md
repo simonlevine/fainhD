@@ -1,8 +1,6 @@
-![](pipeline-logo.png)
+![](fainhD.png)
 
-**f**iltering **a**nd **i**dentifying **n**on-**h**ost **D**NA pipeline, for 03-713 Bioinformatics Practicum at Carnegie Mellon University, Spring 2021
-
-By Jeremy Fisher, Simon Levine, Sid Reed, Tomas Matteson
+**f**iltering **a**nd **i**dentifying **n**on-**h**ost **D**NA pipeline for 03-713 Bioinformatics Practicum at Carnegie Mellon University, Spring 2021 by Jeremy Fisher, Simon Levine, Sid Reed and Tomas Matteson
 
 ## Installation
 
@@ -26,8 +24,8 @@ sbatch run.job
 
 fainhD does the following
 
-1. Filter RNA-seq data to remove host sequences
-2. Assemble unknown sequences into contigs
-3. BLAST virus sequences against known viruses
-4. Predict functional ORFs in viral sequences
-5. Search for structural elements in virus sequences
+- [x] Filter RNA-seq data to remove host sequences
+- [x] Assemble unknown sequences into contigs
+- [ ] BLAST virus sequences against known viruses
+- [ ] Predict functional ORFs in viral sequences
+- [ ] Search for structural elements in virus sequences
