@@ -2,7 +2,10 @@ from snakemake.remote.HTTP import RemoteProvider
 
 HTTP = RemoteProvider()
 reference_genome_url_prefix = "http://labshare.cshl.edu/shares/gingeraslab/www-data/dobin/STAR/STARgenomes/Human/GRCh38_Ensembl99_sparseD3_sjdbOverhang99"
+<<<<<<< HEAD:workflow/rules/1_filer_out_nonhost.smk
 
+=======
+>>>>>>> 4fb4c0b181892563e58efb191cecbb8e1cbc15a3:workflow/rules/1_filer_out_nonhost.smk
 rule download_genome:
     input:
         [HTTP.remote(f"{reference_genome_url_prefix}/{f}", keep_local=True)
