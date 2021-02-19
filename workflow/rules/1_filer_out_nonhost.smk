@@ -53,6 +53,11 @@ rule convert_sam_to_fastq:
         "../data/interim/{sample}_nonhost.sam"
     output:
         "../data/interim/{sample}_nonhost.fq"
-    shell:
-        # see: https://www.cureffi.org/2013/07/04/how-to-convert-sam-to-fastq-with-unix-command-line-tools/
-        """grep -v ^@ | awk '{{print "@"$1"\n"$10"\n+\n"$11}}' < {input} > {output}"""
+    run:
+        with open(input) as fin, open(output, "w") as fout:
+            records = input.readlines()
+            for i, record in enumerate(records):
+                if i % 100:
+                    print(f"converting sam to fastq: {i/len(records):%}...", flush=True)
+                qname, flag, rame, pos, mapq, cigar, rnext, pnetx, tlen, seq, qual, *_ = record.split("\t")
+                f.write(f"@{qname}\n{seq}\n{qual}\n")
