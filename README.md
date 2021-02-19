@@ -1,4 +1,6 @@
-# 03-713 Bioinformatics Practicum, Carnegie Mellon University, Spring 2021
+![](pipeline-logo.png)
+
+**f**iltering **a**nd **i**dentifying **n**on-**h**ost **D**NA pipeline, for 03-713 Bioinformatics Practicum at Carnegie Mellon University, Spring 2021
 
 By Jeremy Fisher, Simon Levine, Sid Reed, Tomas Matteson
 
@@ -6,12 +8,18 @@ By Jeremy Fisher, Simon Levine, Sid Reed, Tomas Matteson
 
 Please refer to [Snakemake's installation instructions](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html), as Snakemake is the only dependency. (It will, in turn, handle the pipelines software and data dependencies.)
 
-## Invocation
+## To run:
 
 To run with the default dataset: 
 
 ```bash
 snakemake --use-conda -j1 all
+```
+
+An example invocation is supplied for HPCs, for example:
+
+```bash
+sbatch run.job
 ```
 
 ## Description
@@ -27,7 +35,7 @@ snakemake --use-conda -j1 all
 
   - Extract Unmapped Reads
     - We aim to isolate non-host sequences from the RNA-seq data.
-    - We will use this to use contig
+    - We will use this to create contiguous sequences
 
 2. Assemble unknown sequences into contigs
    - In progress...
