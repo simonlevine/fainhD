@@ -55,9 +55,9 @@ rule convert_sam_to_fastq:
         "../data/interim/{sample}_nonhost.fq"
     run:
         with open(input[0]) as fin, open(output[0], "w") as fout:
-            records = input.readlines()
+            records = fin.readlines()
             for i, record in enumerate(records):
                 if i % 100:
                     print(f"converting sam to fastq: {i/len(records):%}...", flush=True)
                 qname, flag, rame, pos, mapq, cigar, rnext, pnetx, tlen, seq, qual, *_ = record.split("\t")
-                f.write(f"@{qname}\n{seq}\n{qual}\n")
+                fout.write(f"@{qname}\n{seq}\n{qual}\n")
