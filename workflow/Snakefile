@@ -12,7 +12,7 @@ rule contig_assembly:
     params:
         workdir="data/interim/{sample}_spades_workdir"
     conda:
-        "workflow/envs/spades.yaml"
+        "envs/spades.yaml"
     shell:
         "spades.py --rna --s1 {input} -o {params.workdir} "
         "&& mv {params.workdir}/contigs.fasta {output} "
