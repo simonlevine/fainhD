@@ -15,5 +15,5 @@ rule contig_assembly:
         "envs/spades.yaml"
     shell:
         "spades.py --rna --s1 {input} -o {params.workdir} "
-        "&& mv {params.workdir}/contigs.fasta {output} "
+        "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
         "&& rm -rf {params.workdir}"
