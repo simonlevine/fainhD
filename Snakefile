@@ -7,48 +7,35 @@ HTTP = RemoteProvider()
 reference_genome_url_prefix = config["reference_genome_url_prefix"]
 
 rule all:
-    input: "data/interim/demo_aligned_to_human_genome.sam"
+    input: "data/interim/demo_nonhost_contigs.fasta"
 
 rule download_genome:
     input:
         [HTTP.remote(f"{reference_genome_url_prefix}/{f}", keep_local=True)
          for f in ['chrLength.txt', 'chrName.txt', 'chrStart.txt', 'Genome', 'genomeParameters.txt', 'SA', 'SAindex']]
     output:
-	directory("data/raw/reference_genome")
+        directory("data/raw/reference_genome")
     run:
         for f in input:
-	    shell("mv {f} {output}"
-
+            shell("mv {f} {output}")
 
 rule star_double_ended:
     input:
-        fq1 = "data/raw/{sample}_R1.fastq",
-        fq2 = "data/raw/{sample}_R2.fastq",
-	reference_genome_dir=rules.download_genome.output[0]
+        fq1 = "data/raw/reads/{sample}_R1.fq",
+        fq2 = "data/raw/reads/{sample}_R2.fq",
+        reference_genome_dir=rules.download_genome.output[0]
     output:
         "data/interim/{sample}_aligned_to_human_genome.sam",
     conda:
         "workflow/envs/star.yaml"
-    shell:
-	"STAR"
-	"--genomeDir {input.reference_genome_dir} "
-	"--outFileNamePrefix {output}/ "
-
-rule star_single_ended:
-    input: 
-        fq1 = "data/raw/{sample}.fq",
-        reference_genome_dir="data/raw/reference_genome",
-    output:
-        "data/interim/{sample}_aligned_to_human_genome.sam"
-    log:
-        "logs/star/{sample}.log"
-    params:
-        # path to STAR reference genome index
-        index="data/raw/reference_genome",
-        extra="--outSAMunmapped Within"
     threads: 8
-    wrapper:
-        "0.72.0/bio/star/align"
+    shell:
+        "STAR"
+        " --runThreadN {threads}"
+        " --genomeDir {input.reference_genome_dir}"
+        " --readFilesIn {input.fq1} {input.fq2}"
+        " --outFileNamePrefix {output}/"
+        " --outSAMunmapped Within"
 
 rule extract_unmapped_reads:
    input:
