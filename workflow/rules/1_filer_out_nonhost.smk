@@ -6,7 +6,8 @@ reference_genome_url_prefix = "http://labshare.cshl.edu/shares/gingeraslab/www-d
 rule download_genome:
     input:
         [HTTP.remote(f"{reference_genome_url_prefix}/{f}", keep_local=True)
-         for f in ['chrLength.txt', 'chrName.txt', 'chrStart.txt', 'Genome', 'genomeParameters.txt', 'SA', 'SAindex']]
+         for f in ['chrLength.txt', 'chrName.txt', 'chrStart.txt', 'Genome',
+                   'genomeParameters.txt', 'SA', 'SAindex', "sjdbInfo.txt"]]
     output:
         directory("../data/raw/reference_genome")
     run:
