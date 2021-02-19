@@ -1,0 +1,19 @@
+rule all:
+    input: "data/interim/demo_nonhost_contigs.fasta"
+
+subworkflow filter_out_nonhost:
+    snakefile: "rules/1_filer_out_nonhost.smk"
+
+rule contig_assembly:
+    input: 
+        filter_out_nonhost("../data/interim/{sample}_nonhost.fq")
+    output:
+        "data/interim/{sample}_nonhost_contigs.fasta"
+    params:
+        workdir="data/interim/{sample}_spades_workdir"
+    conda:
+        "workflow/envs/spades.yaml"
+    shell:
+        "spades.py --rna --s1 {input} -o {params.workdir} "
+        "&& mv {params.workdir}/contigs.fasta {output} "
+        "&& rm -rf {params.workdir}"
