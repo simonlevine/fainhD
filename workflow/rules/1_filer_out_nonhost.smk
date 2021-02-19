@@ -1,14 +1,7 @@
-configfile: "config/config.yaml"
-
-from snakemake.io import directory
 from snakemake.remote.HTTP import RemoteProvider
 
 HTTP = RemoteProvider()
-reference_genome_url_prefix = config["reference_genome_url_prefix"]
-
-rule all:
-    input: "data/interim/demo_nonhost_contigs.fasta"
-
+reference_genome_url_prefix = "http://labshare.cshl.edu/shares/gingeraslab/www-data/dobin/STAR/STARgenomes/Human/GRCh38_Ensembl99_sparseD3_sjdbOverhang99"
 rule download_genome:
     input:
         [HTTP.remote(f"{reference_genome_url_prefix}/{f}", keep_local=True)
@@ -21,8 +14,8 @@ rule download_genome:
 
 rule star_double_ended:
     input:
-        fq1 = "data/raw/reads/{sample}_R1.fq",
-        fq2 = "data/raw/reads/{sample}_R2.fq",
+        fq1 = "../data/raw/reads/{sample}_R1.fq",
+        fq2 = "../data/raw/reads/{sample}_R2.fq",
         reference_genome_dir=rules.download_genome.output[0]
     output:
         "data/interim/{sample}_aligned_to_human_genome.sam",
@@ -56,18 +49,4 @@ rule convert_sam_to_fastq:
         "data/interim/{sample}_nonhost.fq"
     shell:
         # see: https://www.cureffi.org/2013/07/04/how-to-convert-sam-to-fastq-with-unix-command-line-tools/
-        """grep -v ^@ | awk '{print "@"$1"\n"$10"\n+\n"$11}' < {input} > {output}"""
-
-rule contig_assembly:
-    input: 
-        "data/interim/{sample}_nonhost.fq"
-    output:
-        "data/interim/{sample}_nonhost_contigs.fasta"
-    params:
-        workdir="data/interim/{sample}_spades_workdir"
-    conda:
-        "workflow/envs/spades.yaml"
-    shell:
-        "spades.py --rna --s1 {input} -o {params.workdir} "
-        "&& mv {params.workdir}/contigs.fasta {output} "
-        "&& rm -rf {params.workdir}"
+        """grep -v ^@ | awk '{{print "@"$1"\n"$10"\n+\n"$11}}' < {input} > {output}"""
