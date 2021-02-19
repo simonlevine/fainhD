@@ -26,13 +26,15 @@ rule star_double_ended:
         "../envs/star.yaml"
     threads: 8
     shell:
-        "mkdir -p {output} && "
-        "STAR"
+        "mkdir -p ../data/interim/{sample}_alignment_workingdir/ "
+        "&& STAR"
         " --runThreadN {threads}"
         " --genomeDir {input.reference_genome_dir}"
         " --readFilesIn {input.fq1} {input.fq2}"
         " --outFileNamePrefix {output}/"
         " --outSAMunmapped Within"
+        "&& mv ../data/interim/{sample}_alignment_workingdir/Aligned.out.sam {output} "
+        "&& rm -rf ../data/interim/{sample}_alignment_workingdir/"
 
 rule extract_unmapped_reads:
    input:
