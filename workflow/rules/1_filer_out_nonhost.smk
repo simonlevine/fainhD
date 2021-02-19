@@ -31,7 +31,7 @@ rule star_double_ended:
         " --runThreadN {threads}"
         " --genomeDir {input.reference_genome_dir}"
         " --readFilesIn {input.fq1} {input.fq2}"
-        " --outFileNamePrefix {output}/"
+        " --outFileNamePrefix ../data/interim/{wildcards.sample}_alignment_workingdir/ "
         " --outSAMunmapped Within"
         "&& mv ../data/interim/{wildcards.sample}_alignment_workingdir/Aligned.out.sam {output} "
         "&& rm -rf ../data/interim/{wildcards.sample}_alignment_workingdir/"
