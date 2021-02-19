@@ -54,7 +54,7 @@ rule convert_sam_to_fastq:
     output:
         "../data/interim/{sample}_nonhost.fq"
     run:
-        with open(input) as fin, open(output, "w") as fout:
+        with open(input[0]) as fin, open(output[0], "w") as fout:
             records = input.readlines()
             for i, record in enumerate(records):
                 if i % 100:
