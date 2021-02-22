@@ -10,7 +10,7 @@
         - http://labshare.cshl.edu/shares/gingeraslab/www-data/dobin/STAR/STARgenomes/Human/GRCh38_Ensembl99_sparseD3_sjdbOverhang99/
         - You'll need `chrLength.txt  chrName.txt  chrStart.txt  Genome  genomeParameters.txt  SA  SAindex`
     - The genome indexes need only be generated once for each reference genome/annotation combination.
-  
+
   ii. Mapping reads: In this step user supplies the genome files generated in the 1st step, as well as the RNA-seq reads (sequences) in the form of FASTA or FASTQ files. STAR maps the reads to the genome, and writes several output files, such as alignments (SAM/BAM), mapping summary statistics, splice junctions, unmapped reads, signal (wiggle) tracks etc.
 
   iii. Extract Unmapped Reads
@@ -19,7 +19,12 @@
 
 2. Assemble unknown sequences into contigs
    - In progress.
+
 3. BLAST virus sequences against known viruses
+    i. First the program downloads the current RefSeq database of all viruses genomes from NCBI, available [here](https://ftp.ncbi.nlm.nih.gov/blast/db/ref_viruses_rep_genomes.tar.gz). More information about the databases is available [here](https://www.ncbi.nlm.nih.gov/books/NBK62345/#blast_ftp_site.The_blastdb_subdirectory).
+
+    ii.
+
 4. Predict functional ORFs in viral sequences
 5. Search for structural elements in virus sequences
 

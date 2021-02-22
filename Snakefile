@@ -1,3 +1,6 @@
+from snakemake.remote.FTP import RemoteProvider as FTPRemoteProvider
+# see https://snakemake.readthedocs.io/en/stable/snakefiles/remote_files.html#file-transfer-protocol-ftp
+
 rule star_single_ended:
     input:
         fq1 = 'input/alignment/reads/novel/sample_sequence.fq'
@@ -25,7 +28,7 @@ rule extract_unmapped_reads:
         # see: http://www.htslib.org/doc/samtools.html
         "-f 4"
     wrapper:
-        "0.72.0/bio/samtools/view" 
+        "0.72.0/bio/samtools/view"
 
 rule convert_sam_to_fastq:
     input:
@@ -37,7 +40,7 @@ rule convert_sam_to_fastq:
         """grep -v ^@ | awk '{print "@"$1"\n"$10"\n+\n"$11}' < {input} > {output}"""
 
 rule contig_assembly:
-    input: 
+    input:
         "./output/filtering/{sample}/nonhost_sequences.fastq"
     output:
         directory("./output/contigs/{sample}")
@@ -45,3 +48,22 @@ rule contig_assembly:
         "environment.yaml"
     shell:
         "spades.py --rna --s1 {input} -o {output}"
+
+rule download_viral_blastdb:
+    FTP = FTPRemoteProvider()  # no username/password required
+    input:
+        FTP.remote("https://ftp.ncbi.nlm.nih.gov/blast/db/ref_viruses_rep_genomes.tar.gz", keep_local=True)
+    output:
+        directory("./input/blastdb")
+    run:
+        "tar -xzvf {input} -C {output}"
+
+rule blast_against_known_viruses
+    input:
+        directory("./output/contigs/{sample}")  # all assembled contigs not matching the human genome as a fasta
+    output:
+        "./output/viral_blast_results"
+    shell:
+        blastn -remote -db ./input/blastdb/ -outfmt 5 -query {input} -out {output}
+        # conda install -c bioconda blastn
+        # format is blast xml, see blastn -h for alternatives
