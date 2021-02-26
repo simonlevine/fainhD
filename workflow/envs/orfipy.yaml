@@ -1,0 +1,11 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - orfipy
+  # - cython
+  # - psutil
+  # - pyfastx
+  # - pyahocorasick
+  # - colorama
