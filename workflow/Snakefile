@@ -17,3 +17,17 @@ rule contig_assembly:
         "spades.py --rna --s1 {input} -o {params.workdir} "
         "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
         "&& rm -rf {params.workdir}"
+
+rule pORF_finding:
+    # input: 
+    #     "data/interim/{sample}_nonhost_contigs.fasta"
+    # output:
+    #     "data/interim/{sample}_nonhost_contigs.fasta"
+    # params:
+    #     workdir="data/interim/{sample}_spades_workdir"
+    # conda:
+    #     "envs/spades.yaml"
+    # shell:
+    #     "spades.py --rna --s1 {input} -o {params.workdir} "
+    #     "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
+    #     "&& rm -rf {params.workdir}"
