@@ -20,11 +20,11 @@ rule contig_assembly:
 
 rule pORF_finding:
     input: 
-        "input/{novel}.fasta"
+        "data/interim/{sample}_nonhost_contigs.fasta"
     output:
-        "{novel}_orf.fa"
+        "{sample}_orf.fa"
     conda:
         "envs/orfipy.yaml"
     shell:
-        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/interim/"
+        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/orf"
         # view hyperparameters with `orfipy -h`
