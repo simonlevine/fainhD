@@ -1,5 +1,12 @@
+configfile: "input.yaml"
+
+from pathlib import Path
+fp = Path(config["fastq_filepath"])
+assert "_R1" in fp.name, "Invalid read file! Please ensure _R1 and/or _R2 are marked as such..."
+sample_name = fp.name.replace("_R1", "").replace("_R2", "")
+
 rule all:
-    input: "data/interim/demo_nonhost_contigs.fasta"
+    input: f"data/interim/{sample_name}_nonhost_contigs.fasta"
 
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filer_out_nonhost.smk"

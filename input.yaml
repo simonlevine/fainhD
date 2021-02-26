@@ -1,0 +1,2 @@
+# Pipeline expects _R1 or _R2 affixes
+fastq_filepath: ""
