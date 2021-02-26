@@ -20,11 +20,9 @@ rule contig_assembly:
 
 rule pORF_finding:
     input: 
-        "data/interim/{sample}_nonhost_contigs.fasta"
+        "input/{novel}.fasta"
     output:
-        "{sample}_nonhost_orf.fa"
-    params:
-        workdir="data/interim/{sample}_spades_workdir"
+        "{novel}_orf.fa"
     conda:
         "envs/orfipy.yaml"
     shell:
