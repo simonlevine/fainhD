@@ -22,11 +22,11 @@ rule pORF_finding:
     input: 
         "data/interim/{sample}_nonhost_contigs.fasta"
     output:
-        "orfs.fa"
+        "{sample}_nonhost_orf.fa"
     params:
         workdir="data/interim/{sample}_spades_workdir"
     conda:
         "envs/orfipy.yaml"
     shell:
-        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir orfs_out"
+        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/interim/"
         # view hyperparameters with `orfipy -h`
