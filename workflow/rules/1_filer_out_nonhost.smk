@@ -1,7 +1,15 @@
+import os
 from snakemake.remote.HTTP import RemoteProvider
 
 HTTP = RemoteProvider()
 reference_genome_url_prefix = "http://labshare.cshl.edu/shares/gingeraslab/www-data/dobin/STAR/STARgenomes/Human/GRCh38_Ensembl99_sparseD3_sjdbOverhang99"
+
+rule download_from_SRA:
+    output:
+        "../data/raw/reads/{accession}_1.fastq",
+        "../data/raw/reads/{accession}_2.fastq",
+    wrapper:
+        "0.72.0/bio/sra-tools/fasterq-dump" 
 
 rule download_genome:
     input:
@@ -17,8 +25,8 @@ rule download_genome:
 
 rule star_double_ended:
     input:
-        fq1 = "../data/raw/reads/{sample}_R1.fq",
-        fq2 = "../data/raw/reads/{sample}_R2.fq",
+        fq1 = [os.path.join("..", fp) for fp in config["sequence_files_R1"]],
+        fq2 = [os.path.join("..", fp) for fp in config["sequence_files_R2"]],
         reference_genome_dir=rules.download_genome.output[0]
     output:
         "../data/interim/{sample}_aligned_to_human_genome.sam",
@@ -32,7 +40,7 @@ rule star_double_ended:
         " --genomeDir {input.reference_genome_dir}"
         " --readFilesIn {input.fq1} {input.fq2}"
         " --outFileNamePrefix ../data/interim/{wildcards.sample}_alignment_workingdir/ "
-        " --outSAMunmapped Within"
+        " --outSAMunmapped Within "
         "&& mv ../data/interim/{wildcards.sample}_alignment_workingdir/Aligned.out.sam {output} "
         "&& rm -rf ../data/interim/{wildcards.sample}_alignment_workingdir/"
 
@@ -60,4 +68,4 @@ rule convert_sam_to_fastq:
                 if i % 10000:
                     print(f"converting sam to fastq: {i/len(records):.2%}...", flush=True)
                 qname, flag, rame, pos, mapq, cigar, rnext, pnetx, tlen, seq, qual, *_ = record.split("\t")
-                fout.write(f"@{qname}\n{seq}\n+\n{qual}\n")
+                fout.write(f"@{qname}\n{seq}\n+{qual}\n")
