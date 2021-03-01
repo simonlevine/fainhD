@@ -24,7 +24,7 @@ rule pORF_finding:
     input: 
         "data/interim/{sample}_nonhost_contigs.fasta"
     output:
-        "{sample}_orf.fa"
+        "data/processed/{sample}_orf.fa"
     conda:
         "envs/orfipy.yaml"
     shell:
