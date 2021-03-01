@@ -4,7 +4,7 @@ rule all:
     input: "data/interim/demo_nonhost_contigs.fasta"
 
 rule get_sample_data:
-    output: "data/interim/demo_nonhost_contigs.fasta"
+    output: "data/interim/demo_nonhost.fq"
 
     shell:
         " cd ./data/interim "
@@ -13,7 +13,7 @@ rule get_sample_data:
         " && gunzip UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq.gz "
         " && rm -rf ./*.gz "
         " && rm -rf ./http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
-        " && mv UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq demo_nonhost_contigs.fasta "
+        " && mv UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq demo_nonhost_contigs.fq "
         " && cd .. "
 
 
