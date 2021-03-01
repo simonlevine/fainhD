@@ -1,7 +1,36 @@
+configfile: "input.yaml"
 
+import re
+import itertools
+from pathlib import Path
+pat = r"^(.*)_R?[12]\.fastq|fq$"
+f, *_ = config["sequence_files_R1"]
+sample_name_a, *_ = re.findall(pat, Path(f).name)
+for sequence_fp in itertools.chain(config["sequence_files_R1"], config["sequence_files_R2"]):
+    sample_name_b, *_ = re.findall(pat, Path(sequence_fp).name)
+    assert sample_name_a == sample_name_b, \
+        "Expected sample name, {}, not consistent for all sequence files!".format(sample_name_a)
+sample_name = sample_name_a
 
 rule all:
-    input: "data/interim/demo_nonhost_contigs.fasta"
+    input: f"data/interim/{sample_name}_nonhost_contigs.fasta"
+
+rule get_sample_data: #The reads are paired-end 101-mers generated on an Illumina HiSeq instrument
+    output:
+        "data/reads/demo_R1.fq"
+        "data/reads/demo_R2.fq"
+
+    shell:
+        " cd ./data/reads "
+        " && wget http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
+        " && tar -xvf HBR_UHR_ERCC_ds_5pc.tar "
+        " && gunzip UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq.gz "
+        " && gunzip UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read2.fastq.gz "
+        " && rm -rf ./*.gz "
+        " && rm -rf ./http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
+        " && mv UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq demo_R1.fq "
+        " && mv UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read2.fastq demo_R2.fq "
+        " && cd .. "
 
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filter_out_nonhost.smk"

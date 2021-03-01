@@ -1,0 +1,8 @@
+# Pipeline expects {_1,_R1, _2, _R2}.fastq affixes and
+# can automatically download from SRA
+
+sequence_files_R1: 
+- "data/raw/reads/SRR8250770_1.fastq"
+
+sequence_files_R2: 
+- "data/raw/reads/SRR8250770_2.fastq"
