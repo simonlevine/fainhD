@@ -33,8 +33,7 @@ rule get_sample_data: #The reads are paired-end 101-mers generated on an Illumin
         " && cd .. "
 
 subworkflow filter_out_nonhost:
-    snakefile: "rules/1_filer_out_nonhost.smk"
-    configfile: "input.yaml"
+    snakefile: "rules/1_filter_out_nonhost.smk"
 
 rule contig_assembly:
     input: 
@@ -49,3 +48,13 @@ rule contig_assembly:
         "spades.py --rna --s1 {input} -o {params.workdir} "
         "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
         "&& rm -rf {params.workdir}"
+
+rule pORF_finding:
+    input: 
+        "data/interim/{sample}_nonhost_contigs.fasta"
+    output:
+        "data/processed/{sample}_orf.fa"
+    conda:
+        "envs/orfipy.yaml"
+    shell:
+        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
