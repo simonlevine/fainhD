@@ -69,4 +69,4 @@ rule convert_sam_to_fastq:
                 if i % 10000:
                     print(f"converting sam to fastq: {i/len(records):.2%}...", flush=True)
                 qname, flag, rame, pos, mapq, cigar, rnext, pnetx, tlen, seq, qual, *_ = record.split("\t")
-                fout.write(f"@{qname}\n{seq}\n+{qual}\n")
+                fout.write(f"@{qname}\n{seq}\n+\n{qual}\n")
