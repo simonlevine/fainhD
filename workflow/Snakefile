@@ -1,8 +1,23 @@
+configfile: "input.yaml"
+
+import re
+import itertools
+from pathlib import Path
+pat = r"^(.*)_R?[12]\.fastq|fq$"
+f, *_ = config["sequence_files_R1"]
+sample_name_a, *_ = re.findall(pat, Path(f).name)
+for sequence_fp in itertools.chain(config["sequence_files_R1"], config["sequence_files_R2"]):
+    sample_name_b, *_ = re.findall(pat, Path(sequence_fp).name)
+    assert sample_name_a == sample_name_b, \
+        "Expected sample name, {}, not consistent for all sequence files!".format(sample_name_a)
+sample_name = sample_name_a
+
 rule all:
-    input: "data/interim/demo_nonhost_contigs.fasta"
+    input: f"data/interim/{sample_name}_nonhost_contigs.fasta"
 
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filer_out_nonhost.smk"
+    configfile: "input.yaml"
 
 rule contig_assembly:
     input: 
