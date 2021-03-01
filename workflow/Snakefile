@@ -21,7 +21,8 @@ subworkflow filter_out_nonhost:
 
 rule contig_assembly:
     input: 
-        filter_out_nonhost("../data/interim/{sample}_nonhost.fq")
+        filter_out_nonhost("../data/interim/{sample_name}_nonhost_R1.fastq"),
+        filter_out_nonhost("../data/interim/{sample_name}_nonhost_R2.fastq")
     output:
         "data/interim/{sample}_nonhost_contigs.fasta"
     params:
@@ -29,6 +30,9 @@ rule contig_assembly:
     conda:
         "envs/spades.yaml"
     shell:
-        "spades.py --rna --s1 {input} -o {params.workdir} "
+        "spades.py --rna "
+        "  --pe1-1 {input[0]} "
+        "  --pe1-2 {input[1]} "
+        "  -o {params.workdir} "
         "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
-        "&& rm -rf {params.workdir}"
+        ";  rm -rf {params.workdir}"
