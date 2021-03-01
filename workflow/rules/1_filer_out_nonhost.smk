@@ -30,44 +30,20 @@ rule star_double_ended:
         fq2 = [os.path.join("..", fp) for fp in config["sequence_files_R2"]],
         reference_genome_dir=rules.download_genome.output[0]
     output:
-        "../data/interim/{sample}_aligned_to_human_genome.sam",
+        "../data/interim/{sample}_nonhost_R1.fastq",
+        "../data/interim/{sample}_nonhost_R2.fastq"
     conda:
         "../envs/star.yaml"
     threads: 12
     shell:
-        "mkdir -p ../data/interim/{wildcards.sample}_alignment_workingdir/ "
+        "export STAR_WORK_DIR=../data/interim/{wildcards.sample}_alignment_workingdir/ "
+        "&& mkdir -p $STAR_WORK_DIR "
         "&& STAR"
         " --runThreadN {threads}"
         " --genomeDir {input.reference_genome_dir}"
         " --readFilesIn {input.fq1} {input.fq2}"
-        " --outFileNamePrefix ../data/interim/{wildcards.sample}_alignment_workingdir/ "
+        " --outFileNamePrefix $STAR_WORK_DIR"
         " --outReadsUnmapped Fastx"
-        # " --outSAMunmapped Within "
-        # "&& mv ../data/interim/{wildcards.sample}_alignment_workingdir/Aligned.out.sam {output} "
-        # "&& rm -rf ../data/interim/{wildcards.sample}_alignment_workingdir/"
-
-rule extract_unmapped_reads:
-   input:
-        "../data/interim/{sample}_aligned_to_human_genome.sam"
-   output:
-        "../data/interim/{sample}_nonhost.sam"
-   params:
-       # '4' is the flag for unmapped reads
-       # see: http://www.htslib.org/doc/samtools.html
-       "-f 4"
-   wrapper:
-       "0.72.0/bio/samtools/view" 
-
-rule convert_sam_to_fastq:
-    input:
-        "../data/interim/{sample}_nonhost.sam"
-    output:
-        "../data/interim/{sample}_nonhost.fq"
-    run:
-        with open(input[0]) as fin, open(output[0], "w") as fout:
-            records = fin.readlines()
-            for i, record in enumerate(records):
-                if i % 10000:
-                    print(f"converting sam to fastq: {i/len(records):.2%}...", flush=True)
-                qname, flag, rame, pos, mapq, cigar, rnext, pnetx, tlen, seq, qual, *_ = record.split("\t")
-                fout.write(f"@{qname}\n{seq}\n+\n{qual}\n")
+        "&& mv $STAR_WORK_DIR/Unmapped.out.mate1 {output[0]} "
+        "&& mv $STAR_WORK_DIR/Unmapped.out.mate2 {output[1]} "
+        ";  rm -rf $STAR_WORK_DIR"
