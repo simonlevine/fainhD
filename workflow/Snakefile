@@ -4,6 +4,8 @@ rule all:
     input: "data/interim/demo_nonhost_contigs.fasta"
 
 rule get_sample_data:
+    output: "data/interim/demo_nonhost_contigs.fasta"
+
     shell:
         " cd ./data/interim "
         " && wget http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
@@ -13,7 +15,6 @@ rule get_sample_data:
         " && rm -rf ./http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
         " && mv UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq demo_nonhost_contigs.fasta "
         " && cd .. "
-    output: "data/interim/demo_nonhost_contigs.fasta"
 
 
 subworkflow filter_out_nonhost:
