@@ -1,3 +1,8 @@
+
+
+rule all:
+    input: "data/interim/demo_nonhost_contigs.fasta"
+
 rule get_sample_data:
     shell:
         " cd ./data/interim "
@@ -8,9 +13,8 @@ rule get_sample_data:
         " && rm -rf ./http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
         " && mv UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq demo_nonhost_contigs.fasta "
         " && cd .. "
+    output: "data/interim/demo_nonhost_contigs.fasta"
 
-rule all:
-    input: "data/interim/demo_nonhost_contigs.fasta"
 
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filter_out_nonhost.smk"
