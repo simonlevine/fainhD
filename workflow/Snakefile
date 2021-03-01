@@ -3,7 +3,7 @@
 rule all:
     input: "data/interim/demo_nonhost_contigs.fasta"
 
-rule get_sample_data:
+rule get_sample_data: #The reads are paired-end 101-mers generated on an Illumina HiSeq instrument
     output: "data/interim/demo_nonhost.fq"
 
     shell:
