@@ -32,18 +32,19 @@ rule star_double_ended:
     output:
         "../data/interim/{sample}_nonhost_R1.fastq",
         "../data/interim/{sample}_nonhost_R2.fastq"
+    params:
+        workdir="../data/interim/{sample}_alignment_workdir"
     conda:
         "../envs/star.yaml"
     threads: 12
     shell:
-        "export STAR_WORK_DIR=../data/interim/{wildcards.sample}_alignment_workingdir/ "
-        "&& mkdir -p $STAR_WORK_DIR "
+        "mkdir -p {params.workdir} "
         "&& STAR"
-        " --runThreadN {threads}"
-        " --genomeDir {input.reference_genome_dir}"
-        " --readFilesIn {input.fq1} {input.fq2}"
-        " --outFileNamePrefix $STAR_WORK_DIR"
-        " --outReadsUnmapped Fastx "
-        "&& mv $STAR_WORK_DIR/Unmapped.out.mate1 {output[0]} "
-        "&& mv $STAR_WORK_DIR/Unmapped.out.mate2 {output[1]} "
-        ";  rm -rf $STAR_WORK_DIR"
+        "  --runThreadN {threads} "
+        "  --genomeDir {input.reference_genome_dir} "
+        "  --readFilesIn {input.fq1} {input.fq2} "
+        "  --outFileNamePrefix {params.workdir} "
+        "  --outReadsUnmapped Fastx "
+        "&& mv {params.workdir}/Unmapped.out.mate1 {output[0]} "
+        "&& mv {params.workdir}/Unmapped.out.mate2 {output[1]} "
+        ";  rm -rf {params.workdir}"
