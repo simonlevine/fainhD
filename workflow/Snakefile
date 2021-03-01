@@ -3,7 +3,6 @@
 rule all:
     input: "data/interim/demo_nonhost_contigs.fasta"
 
-
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filter_out_nonhost.smk"
 
