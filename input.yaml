@@ -1,8 +1,19 @@
+# This is the "command panel" of the fainD pipeline, where
+# input RNAseq experiments may be specified.
+# 
 # Pipeline expects {_1,_R1, _2, _R2}.fastq affixes and
-# can automatically download from SRA
-
+# can automatically download from SRA. For example, to
+# use the HPV-positive RNAseq experiment from SRA with
+# the accession number "SRR8250770", then one may use
+# the following invocation:
+# 
+# sequence_files_R1: 
+# - "data/raw/reads/SRR8250770_1.fastq"
+# sequence_files_R2: 
+# - "data/raw/reads/SRR8250770_2.fastq"
+# 
+# By default, we demonstrate usage with a small RNAseq experiment
 sequence_files_R1: 
-- "data/raw/reads/SRR8250770_1.fastq"
-
+- "data/raw/reads/demo_R1.fastq"
 sequence_files_R2: 
-- "data/raw/reads/SRR8250770_2.fastq"
+- "data/raw/reads/demo_R2.fastq"

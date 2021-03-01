@@ -1,15 +1,9 @@
+include: "0_download_rnaseq_data.smk"
+
 import os
 from snakemake.remote.HTTP import RemoteProvider
-
 HTTP = RemoteProvider()
 reference_genome_url_prefix = "http://labshare.cshl.edu/shares/gingeraslab/www-data/dobin/STAR/STARgenomes/Human/GRCh38_Ensembl99_sparseD3_sjdbOverhang99"
-
-rule download_from_SRA:
-    output:
-        "../data/raw/reads/{accession}_1.fastq",
-        "../data/raw/reads/{accession}_2.fastq",
-    wrapper:
-        "0.72.0/bio/sra-tools/fasterq-dump" 
 
 rule download_genome:
     input:
