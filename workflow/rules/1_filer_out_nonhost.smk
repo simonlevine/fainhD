@@ -9,14 +9,15 @@ rule download_genome:
          for f in ['chrLength.txt', 'chrName.txt', 'chrStart.txt', 'Genome',
                    'genomeParameters.txt', 'SA', 'SAindex', "sjdbInfo.txt"]]
     output:
-        directory("../data/raw/reference_genome")
+        directory("../data/raw/reference_genome"),
+        completion_flag=touch("../data/raw/reference_genome/download_genome.done")
     run:
-        shell("mkdir -p {output}")
         for f in input:
-            shell("mv {f} {output}")
+            shell("mv {f} {output[0]}")
 
 rule star_double_ended:
     input:
+        rules.download_genome.output["completion_flag"],
         fq1 = "../data/raw/reads/{sample}_R1.fq",
         fq2 = "../data/raw/reads/{sample}_R2.fq",
         reference_genome_dir=rules.download_genome.output[0]
