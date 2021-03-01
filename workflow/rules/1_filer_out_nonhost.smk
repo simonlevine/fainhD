@@ -43,7 +43,7 @@ rule star_double_ended:
         " --genomeDir {input.reference_genome_dir}"
         " --readFilesIn {input.fq1} {input.fq2}"
         " --outFileNamePrefix $STAR_WORK_DIR"
-        " --outReadsUnmapped Fastx"
+        " --outReadsUnmapped Fastx "
         "&& mv $STAR_WORK_DIR/Unmapped.out.mate1 {output[0]} "
         "&& mv $STAR_WORK_DIR/Unmapped.out.mate2 {output[1]} "
         ";  rm -rf $STAR_WORK_DIR"
