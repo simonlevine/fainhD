@@ -1,13 +1,13 @@
 rule get_sample_data:
     shell:
-    " cd ./data/interim "
-    " && wget http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
-    " && tar -xvf HBR_UHR_ERCC_ds_5pc.tar "
-    " && gunzip UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq.gz "
-    " && rm -rf ./*.gz "
-    " && rm -rf ./http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
-    " && mv UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq demo_nonhost_contigs.fasta "
-    " && cd .. "
+        " cd ./data/interim "
+        " && wget http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
+        " && tar -xvf HBR_UHR_ERCC_ds_5pc.tar "
+        " && gunzip UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq.gz "
+        " && rm -rf ./*.gz "
+        " && rm -rf ./http://genomedata.org/rnaseq-tutorial/HBR_UHR_ERCC_ds_5pc.tar "
+        " && mv UHR_Rep1_ERCC-Mix1_Build37-ErccTranscripts-chr22.read1.fastq demo_nonhost_contigs.fasta "
+        " && cd .. "
 
 rule all:
     input: "data/interim/demo_nonhost_contigs.fasta"
