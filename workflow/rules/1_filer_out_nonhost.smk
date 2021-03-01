@@ -32,7 +32,7 @@ rule star_double_ended:
         "../data/interim/{sample}_aligned_to_human_genome.sam",
     conda:
         "../envs/star.yaml"
-    threads: 8
+    threads: 12
     shell:
         "mkdir -p ../data/interim/{wildcards.sample}_alignment_workingdir/ "
         "&& STAR"
