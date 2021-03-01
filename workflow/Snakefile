@@ -29,4 +29,3 @@ rule pORF_finding:
         "envs/orfipy.yaml"
     shell:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
-        # view hyperparameters with `orfipy -h`
