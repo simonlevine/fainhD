@@ -13,7 +13,7 @@ for sequence_fp in itertools.chain(config["sequence_files_R1"], config["sequence
 sample_name = sample_name_a
 
 rule all:
-    input: f"data/interim/{sample_name}_nonhost_contigs.fasta"
+    input: f"data/processed/{sample_name}_orf.fasta"
 
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filter_out_nonhost.smk"
@@ -41,7 +41,7 @@ rule pORF_finding:
     input: 
         "data/interim/{sample}_nonhost_contigs.fasta"
     output:
-        "data/processed/{sample}_orf.fa"
+        "data/processed/{sample}_orf.fasta"
     conda:
         "envs/orfipy.yaml"
     shell:
