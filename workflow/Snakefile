@@ -1,0 +1,48 @@
+configfile: "input.yaml"
+
+import re
+import itertools
+from pathlib import Path
+pat = r"^(.*)_R?[12]\.fastq|fq$"
+f, *_ = config["sequence_files_R1"]
+sample_name_a, *_ = re.findall(pat, Path(f).name)
+for sequence_fp in itertools.chain(config["sequence_files_R1"], config["sequence_files_R2"]):
+    sample_name_b, *_ = re.findall(pat, Path(sequence_fp).name)
+    assert sample_name_a == sample_name_b, \
+        "Expected sample name, {}, not consistent for all sequence files!".format(sample_name_a)
+sample_name = sample_name_a
+
+rule all:
+    input: f"data/processed/{sample_name}_orf.fasta"
+
+subworkflow filter_out_nonhost:
+    snakefile: "rules/1_filter_out_nonhost.smk"
+    configfile: "input.yaml"
+
+rule contig_assembly:
+    input: 
+        filter_out_nonhost(f"../data/interim/{sample_name}_nonhost_R1.fastq"),
+        filter_out_nonhost(f"../data/interim/{sample_name}_nonhost_R2.fastq")
+    output:
+        "data/interim/{sample}_nonhost_contigs.fasta"
+    params:
+        workdir="data/interim/{sample}_spades_workdir"
+    conda:
+        "envs/spades.yaml"
+    shell:
+        "spades.py --rna "
+        "  --pe1-1 {input[0]} "
+        "  --pe1-2 {input[1]} "
+        "  -o {params.workdir} "
+        "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
+        ";  rm -rf {params.workdir}"
+
+rule pORF_finding:
+    input: 
+        "data/interim/{sample}_nonhost_contigs.fasta"
+    output:
+        "data/processed/{sample}_orf.fasta"
+    conda:
+        "envs/orfipy.yaml"
+    shell:
+        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
