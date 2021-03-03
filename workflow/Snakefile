@@ -13,7 +13,9 @@ for sequence_fp in itertools.chain(config["sequence_files_R1"], config["sequence
 sample_name = sample_name_a
 
 rule all:
-    input: f"data/processed/{sample_name}_orf.fasta"
+    input:
+        f"data/processed/{sample_name}_orf.fasta",
+        f"data/processed/{sample_name}_blast_results.out"
 
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filter_out_nonhost.smk"
@@ -37,6 +39,21 @@ rule contig_assembly:
         "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
         ";  rm -rf {params.workdir}"
 
+rule blast_against_known_viruses:
+    input:
+        contigs="data/interim/{sample}_nonhost_contigs.fasta"
+    params:
+        blastn_db="nt"
+    output:
+        "data/processed/{sample}_blast_results.out"
+    conda:
+        "envs/blastn.yaml"
+    shell:
+        "blastn -remote -db {params.blastn_db} "
+        "-outfmt 5 "
+        "-query {input.contigs} "
+        "-out {output}"
+
 rule pORF_finding:
     input: 
         "data/interim/{sample}_nonhost_contigs.fasta"
@@ -46,3 +63,4 @@ rule pORF_finding:
         "envs/orfipy.yaml"
     shell:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
+
