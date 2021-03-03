@@ -62,5 +62,5 @@ rule pORF_finding:
     conda:
         "envs/orfipy.yaml"
     shell:
-        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
+        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
 
