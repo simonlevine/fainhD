@@ -17,14 +17,14 @@ def input_file_validation(sample, paired_end: Literal["1", "2"]):
     SRA accession number and download"""
     data_dir = Path("data/raw/reads")
     pat = r"^" + sample + r"_?R" + paired_end + r"_?\.(fastq|fq)(\.gz)?"
-    fqs = [fq for fq in data_dir.glob("*") if re.match(pat, fq)]
+    fqs = [fq for fq in data_dir.glob("*") if re.match(pat, fq.name)]
     try:
         fq, = fqs
     except ValueError:
         print(f"Could not find paired end file R{paired_end} for sample {sample}. "
               f"Assuming this is a SRA accesion number...")
-        return data_dir/f"{sample}_{paired_end}.fastq"
-    return fq
+        return str(data_dir/f"{sample}_{paired_end}.fastq")
+    return str(fq)
 
 rule star_double_ended:
     input:

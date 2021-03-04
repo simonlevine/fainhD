@@ -8,8 +8,8 @@ rule download_genome:
          for f in ['chrLength.txt', 'chrName.txt', 'chrStart.txt', 'Genome',
                    'genomeParameters.txt', 'SA', 'SAindex', "sjdbInfo.txt"]]
     output:
-        directory("../data/raw/reference_genome"),
-        completion_flag=touch("../data/raw/reference_genome/download_genome.done")
+        directory("data/raw/reference_genome"),
+        completion_flag=touch("data/raw/reference_genome/download_genome.done")
     run:
         for f in input:
             shell("mv {f} {output[0]}")
