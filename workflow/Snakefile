@@ -46,17 +46,23 @@ rule make_known_virus_blastdb:
     input:
         HTTP.remote("https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.1.genomic.fna.gz")
         # described here https://ftp.ncbi.nlm.nih.gov/refseq/release/README
-    output:
-        "data/blast/virus_blastdb" # used in downstream rule, should be a global?
     params:
-        local_fasta="data/blast/all_known_viruses.fasta"
+        local_fasta="data/blast/all_known_viruses.fasta",
+        db_prefix="data/blast/virus_blastdb" # used in downstream rule, should be a global?
+    output:
+       "data/blast/virus_blastdb.nhr",
+       "data/blast/virus_blastdb.nin",
+       "data/blast/virus_blastdb.nog",
+       "data/blast/virus_blastdb.nsd",
+       "data/blast/virus_blastdb.nsi",
+       "data/blast/virus_blastdb.nsq"
     shell:
         "gzip -d -c {input} >| {params.local_fasta} "
         "&& makeblastdb -dbtype nucl "
         "-parse_seqids "
         "-in {params.local_fasta} "
-        "-out {output}"
-#"&& rm {params.local_fasta}"
+        "-out {params.db_prefix} "
+        "&& rm {params.local_fasta}"
 
 rule blast_against_known_viruses:
 # should have make_known_viruse_blastdb as dependency
