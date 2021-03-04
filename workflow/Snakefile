@@ -1,5 +1,8 @@
 configfile: "input.yaml"
 
+from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+HTTP = HTTPRemoteProvider() #for blast
+
 import re
 import itertools
 from pathlib import Path
@@ -14,15 +17,15 @@ sample_name = sample_name_a
 
 rule all:
     input:
-        f"data/processed/{sample_name}_orf.fasta",
-        f"data/processed/{sample_name}_blast_results.out"
+        #f"data/processed/{sample_name}_orf.fasta",
+        #f"data/processed/{sample_name}_blast_results.xml"
 
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filter_out_nonhost.smk"
     configfile: "input.yaml"
 
 rule contig_assembly:
-    input: 
+    input:
         filter_out_nonhost(f"../data/interim/{sample_name}_nonhost_R1.fastq"),
         filter_out_nonhost(f"../data/interim/{sample_name}_nonhost_R2.fastq")
     output:
@@ -39,23 +42,40 @@ rule contig_assembly:
         "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
         ";  rm -rf {params.workdir}"
 
+rule make_known_virus_blastdb:
+    input:
+        HTTP.remote("https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.1.genomic.fna.gz")
+        # described here https://ftp.ncbi.nlm.nih.gov/refseq/release/README
+    output:
+        "data/blast/virus_blastdb" # used in downstream rule, should be a global?
+    params:
+        local_fasta="data/blast/all_known_viruses.fasta"
+    shell:
+        "gzip -d -c {input} >| {params.local_fasta} "
+        "&& makeblastdb -dbtype nucl "
+        "-parse_seqids "
+        "-in {params.local_fasta} "
+        "-out {output}"
+#"&& rm {params.local_fasta}"
+
 rule blast_against_known_viruses:
+# should have make_known_viruse_blastdb as dependency
     input:
         contigs="data/interim/{sample}_nonhost_contigs.fasta"
-    params:
-        blastn_db="nt"
     output:
-        "data/processed/{sample}_blast_results.out"
+        "data/processed/{sample}_blast_results.xml"
+    params:
+        db_name="data/blast/virus_blastdb" # createde upstream, should be global?
     conda:
         "envs/blastn.yaml"
     shell:
-        "blastn -remote -db {params.blastn_db} "
+        "blastn -db {params.db_name} "
         "-outfmt 5 "
         "-query {input.contigs} "
         "-out {output}"
 
 rule pORF_finding:
-    input: 
+    input:
         "data/interim/{sample}_nonhost_contigs.fasta"
     output:
         "data/processed/{sample}_orf.fasta"
