@@ -30,7 +30,7 @@ rule contig_assembly:
     conda:
         "envs/spades.yaml"
     shell:
-        "spades.py --rna "
+        "spades.py --rnaviral "
         "  --pe1-1 {input[0]} "
         "  --pe1-2 {input[1]} "
         "  -o {params.workdir} "
