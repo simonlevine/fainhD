@@ -55,13 +55,8 @@ rule contig_assembly:
         workdir="data/interim/{sample}_spades_workdir"
     conda:
         "envs/spades.yaml"
-    shell:
-        "spades.py --rna "
-        "  --pe1-1 {input[0]} "
-        "  --pe1-2 {input[1]} "
-        "  -o {params.workdir} "
-        "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
-        ";  rm -rf {params.workdir}"
+    script:
+        "scripts/spades.py"
 
 rule make_known_virus_blastdb:
     # adapted from https://github.com/EnvGen/snakemake-workflows/blob/master/bio/ngs/rules/quality_control/internal_standards.rules
@@ -84,6 +79,7 @@ rule make_known_virus_blastdb:
 rule blast_against_known_viruses:
 # should have make_known_viruse_blastdb as dependency
     input:
+        "data/blast/virus_blastdb.nhr",
         contigs="data/interim/{sample}_nonhost_contigs.fasta"
     output:
         "data/processed/{sample}_blast_results.tsv"
