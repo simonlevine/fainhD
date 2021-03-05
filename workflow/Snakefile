@@ -1,48 +1,68 @@
+import re
+from typing import Literal
+from pathlib import Path
+
 configfile: "input.yaml"
 
-import re
-import itertools
-from pathlib import Path
-pat = r"^(.*)_R?[12]\.fastq|fq$"
-f, *_ = config["sequence_files_R1"]
-sample_name_a, *_ = re.findall(pat, Path(f).name)
-for sequence_fp in itertools.chain(config["sequence_files_R1"], config["sequence_files_R2"]):
-    sample_name_b, *_ = re.findall(pat, Path(sequence_fp).name)
-    assert sample_name_a == sample_name_b, \
-        "Expected sample name, {}, not consistent for all sequence files!".format(sample_name_a)
-sample_name = sample_name_a
+def input_file_validation(sample, paired_end: Literal["1", "2"]):
+    """given a sample name specified at the top-level, i.e., at the
+    command line, determine the corresponding read files. If the
+    file is not found in `data/raw/reads`, assume that this is a
+    SRA accession number and download"""
+    data_dir = Path("data/raw/reads")
+    pat = r"^" + sample + r"_?R" + paired_end + r"_?\.(fastq|fq)(\.gz)?"
+    fqs = [fq for fq in data_dir.glob("*") if re.match(pat, fq.name)]
+    try:
+        fq, = fqs
+    except ValueError:
+        print(f"Could not find paired end file R{paired_end} for sample {sample}. "
+              f"Assuming this is a SRA accession number...")
+        return str(data_dir/f"{sample}_{paired_end}.fastq")
+    return str(fq)
 
 rule all:
-    input: f"data/processed/{sample_name}_orf.fasta"
+    input:
+        "data/processed/{}_orf.fasta".format(config["sample"]),
+        "data/processed/{}_blast_results.tsv".format(config["sample"])
 
-subworkflow filter_out_nonhost:
-    snakefile: "rules/1_filter_out_nonhost.smk"
-    configfile: "input.yaml"
+include: "rules/download_from_sequence_read_archives.smk"
+include: "rules/download_human_genome.smk"
+
+rule star_double_ended:
+    input:
+        rules.download_genome.output["completion_flag"],
+        reference_genome_dir=rules.download_genome.output[0],
+        fq1 = lambda wildcards: input_file_validation(wildcards.sample, "1"),
+        fq2 = lambda wildcards: input_file_validation(wildcards.sample, "2")
+    output:
+        "data/interim/{sample}_nonhost_R1.fastq",
+        "data/interim/{sample}_nonhost_R2.fastq"
+    conda:
+        "envs/star.yaml"
+    threads: 12
+    script:
+        "scripts/star.py"
 
 rule contig_assembly:
     input: 
-        filter_out_nonhost(f"../data/interim/{sample_name}_nonhost_R1.fastq"),
-        filter_out_nonhost(f"../data/interim/{sample_name}_nonhost_R2.fastq")
+        "data/interim/{sample}_nonhost_R1.fastq",
+        "data/interim/{sample}_nonhost_R2.fastq"
     output:
         "data/interim/{sample}_nonhost_contigs.fasta"
     params:
         workdir="data/interim/{sample}_spades_workdir"
     conda:
         "envs/spades.yaml"
-    shell:
-        "spades.py --rnaviral "
-        "  --pe1-1 {input[0]} "
-        "  --pe1-2 {input[1]} "
-        "  -o {params.workdir} "
-        "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
-        ";  rm -rf {params.workdir}"
+    script:
+        "scripts/spades.py"
 
 rule pORF_finding:
-    input: 
+    input:
         "data/interim/{sample}_nonhost_contigs.fasta"
     output:
         "data/processed/{sample}_orf.fasta"
     conda:
         "envs/orfipy.yaml"
     shell:
-        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
+        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
+
