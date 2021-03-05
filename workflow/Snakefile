@@ -1,6 +1,9 @@
 import re
 from typing import Literal
 from pathlib import Path
+from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+
+HTTP = HTTPRemoteProvider()
 
 configfile: "input.yaml"
 include: "rules/0_download_rnaseq_data.smk"
@@ -23,7 +26,9 @@ def input_file_validation(sample, paired_end: Literal["1", "2"]):
     return str(fq)
 
 rule all:
-    input: "data/processed/{}_orf.fasta".format(config["sample"])
+    input:
+        "data/processed/{}_orf.fasta".format(config["sample"]),
+        "data/processed/{}_blast_results.tsv".format(config["sample"])
 
 rule star_double_ended:
     input:
@@ -58,8 +63,41 @@ rule contig_assembly:
         "&& mv {params.workdir}/soft_filtered_transcripts.fasta {output} "
         ";  rm -rf {params.workdir}"
 
+rule make_known_virus_blastdb:
+    # adapted from https://github.com/EnvGen/snakemake-workflows/blob/master/bio/ngs/rules/quality_control/internal_standards.rules
+    input:
+        HTTP.remote("https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.1.genomic.fna.gz"),
+        # described here https://ftp.ncbi.nlm.nih.gov/refseq/release/README
+    params:
+        db_prefix="data/blast/virus_blastdb",  # used in downstream rule, should be a global?
+        virus_fasta="data/blast/all_known_viruses.fasta"
+    output:
+        expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsd", "nsi", "nsq" ])
+    shell:
+        "gzip -d -c {input} >| {params.virus_fasta} "
+        "&& makeblastdb -dbtype nucl "
+        "-parse_seqids "
+        "-input_type fasta "
+        "-in {params.virus_fasta} "
+        "-out {params.db_prefix} "
+
+rule blast_against_known_viruses:
+# should have make_known_viruse_blastdb as dependency
+    input:
+        contigs="data/interim/{sample}_nonhost_contigs.fasta"
+    output:
+        "data/processed/{sample}_blast_results.tsv"
+    params:
+        db_name="data/blast/virus_blastdb" # createde upstream, should be global?
+    shell:
+        "module load BLAST "
+        "&& blastn -db {params.db_name} "
+        "-outfmt 6 "
+        "-query {input.contigs} "
+        "-out {output}"
+
 rule pORF_finding:
-    input: 
+    input:
         "data/interim/{sample}_nonhost_contigs.fasta"
     output:
         "data/processed/{sample}_orf.fasta"
@@ -67,3 +105,4 @@ rule pORF_finding:
         "envs/orfipy.yaml"
     shell:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
+
