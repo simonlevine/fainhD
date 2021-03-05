@@ -1,15 +1,11 @@
-configfile: "input.yaml"
-
-include: "rules/0_download_rnaseq_data.smk"
-include: "rules/1_download_genome.smk"
-
-rule all:
-    input: "data/processed/{}_orf.fasta".format(config["sample"])
-
-
 import re
 from typing import Literal
 from pathlib import Path
+
+configfile: "input.yaml"
+include: "rules/0_download_rnaseq_data.smk"
+include: "rules/1_download_genome.smk"
+
 def input_file_validation(sample, paired_end: Literal["1", "2"]):
     """given a sample name specified at the top-level, i.e., at the
     command line, determine the corresponding read files. If the
@@ -25,6 +21,9 @@ def input_file_validation(sample, paired_end: Literal["1", "2"]):
               f"Assuming this is a SRA accesion number...")
         return str(data_dir/f"{sample}_{paired_end}.fastq")
     return str(fq)
+
+rule all:
+    input: "data/processed/{}_orf.fasta".format(config["sample"])
 
 rule star_double_ended:
     input:
