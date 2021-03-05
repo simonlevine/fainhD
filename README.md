@@ -16,13 +16,12 @@ fainhD does the following
 
 Please refer to [Snakemake's installation instructions](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html), as Snakemake is the only dependency. It will, in turn, handle the pipelines software and data dependencies.
 
-Then, clone this repository and 
+Then, clone this repository and run as follows:
 
 ## To run
-
-After cloning, `cd` into this repository. Change the `input.yaml` to refer to the proper dataset (as described below). Then, invoke:
+After cloning, `cd` into this repository. Change the `input.yaml` to refer to the proper dataset (as described below). Then, invoke (with, for example, two cores):
 ```bash
-snakemake --use-conda -j1 all
+snakemake --use-conda -j2 
 ```
 
 To use an HPC, an example job script is supplied at `run.job`:
@@ -34,32 +33,18 @@ sbatch run.job
 
 ### Local
 
-Only paired-end read data are supported. If those data are available locally (e.g., if they were downloaded before-hand), specify their filepaths in `input.yaml` relative to the repository root:
+Only paired-end read are supported. If those data are available locally (e.g., if they were downloaded before-hand), put them in the `data/raw/reads` folder and specify the library name in the `input.yaml` file. For example, if the read files were "foo_R1.fastq" and "foo_R2.fastq.fastq" and specify the sample name as:
 
 ```yaml
-sequence_files_R1: 
-- "data/raw/reads/library_R1.fastq"
-sequence_files_R2: 
-- "data/raw/reads/library_R2.fastq"
+sample: library
 ```
-
-In this case, we expect read libraries to reside in `data/raw/reads`, although they can reside anywhere 
 
 ### Sequence Read Archive
 
-We facilitate using any paired-end RNAseq dataset from SRA. Simply specify the accession number like so in the `input.yaml`:
+We facilitate using any paired-end RNAseq dataset from SRA. Simply specify the accession number as the sample:
+
 ```yaml
-sequence_files_R1: 
-- "data/raw/reads/{accession-number}_1.fastq"
-sequence_files_R2: 
-- "data/raw/reads/{accession-number}_2.fastq"
-```
-For example, to use the HPV-positive experiment under `SRR8250770`, use:
-```yaml
-sequence_files_R1: 
-- "data/raw/reads/SRR8250770_1.fastq"
-sequence_files_R2: 
-- "data/raw/reads/SRR8250770_2.fastq"
+sample: SRR8250770 
 ```
 
-Please note, if one does use the automatic SRA download feature, the `data/raw/reads` bit is **not optional**.
+This would run the pipeline on the HPV-positive experiment under the accession number `SRR8250770`
