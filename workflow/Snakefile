@@ -43,7 +43,7 @@ rule star_double_ended:
         "envs/star.yaml"
     threads: 12
     script:
-        "scripts/star_de.py"
+        "scripts/star.py"
 
 rule contig_assembly:
     input: 
