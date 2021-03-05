@@ -100,13 +100,13 @@ rule blast_against_known_viruses:
         "-query {input.contigs} "
         "-out {output}"
 
-# rule pORF_finding:
-    # input:
-        # "data/interim/{sample}_nonhost_contigs.fasta"
-    # output:
-        # "data/processed/{sample}_orf.fasta"
-    # conda:
-        # "envs/orfipy.yaml"
-    # shell:
-        # "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
+rule pORF_finding:
+    input:
+        "data/interim/{sample}_nonhost_contigs.fasta"
+    output:
+        "data/processed/{sample}_orf.fasta"
+    conda:
+        "envs/orfipy.yaml"
+    shell:
+        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
