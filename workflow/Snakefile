@@ -68,10 +68,9 @@ rule blast_against_known_viruses:
         "data/processed/{sample}_blast_results.tsv"
     params:
         db_name="data/blast/virus_blastdb" # createde upstream, should be global?
-    conda:
-        "envs/blastn.yaml"
     shell:
-        "blastn -db {params.db_name} "
+        "module load BLAST "
+        "&& blastn -db {params.db_name} "
         "-outfmt 6 "
         "-query {input.contigs} "
         "-out {output}"
