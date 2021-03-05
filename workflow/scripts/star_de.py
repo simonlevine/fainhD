@@ -1,8 +1,9 @@
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from snakemake.shell import shell
 
-with TemporaryDirectory() as tmpdir:
+with TemporaryDirectory(suffix=os.cwd()) as tmpdir:
     shell("STAR --runThreadN {snakemake.threads} "
           "--genomeDir {snakemake.input.reference_genome_dir} "
           "--readFilesIn {snakemake.input.fq1} {snakemake.input.fq2} "
