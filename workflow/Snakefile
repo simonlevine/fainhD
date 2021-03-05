@@ -17,8 +17,8 @@ sample_name = sample_name_a
 
 rule all:
     input:
-        #f"data/processed/{sample_name}_orf.fasta",
-        #f"data/processed/{sample_name}_blast_results.xml"
+        f"data/processed/{sample_name}_orf.fasta",
+        f"data/processed/{sample_name}_blast_results.tsv"
 
 subworkflow filter_out_nonhost:
     snakefile: "rules/1_filter_out_nonhost.smk"
@@ -65,14 +65,14 @@ rule blast_against_known_viruses:
     input:
         contigs="data/interim/{sample}_nonhost_contigs.fasta"
     output:
-        "data/processed/{sample}_blast_results.xml"
+        "data/processed/{sample}_blast_results.tsv"
     params:
         db_name="data/blast/virus_blastdb" # createde upstream, should be global?
     conda:
         "envs/blastn.yaml"
     shell:
         "blastn -db {params.db_name} "
-        "-outfmt 5 "
+        "-outfmt 6 "
         "-query {input.contigs} "
         "-out {output}"
 
