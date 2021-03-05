@@ -73,7 +73,7 @@ rule make_known_virus_blastdb:
         db_prefix="data/blast/virus_blastdb",  # used in downstream rule, should be a global?
         virus_fasta="data/blast/all_known_viruses.fasta"
     output:
-        expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsd", "nsi", "nsq" ])
+        expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsq"])
     conda:
         "envs/blast.yaml"
     shell:
