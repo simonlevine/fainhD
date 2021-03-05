@@ -68,6 +68,8 @@ rule make_known_virus_blastdb:
         virus_fasta="data/blast/all_known_viruses.fasta"
     output:
         expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsd", "nsi", "nsq" ])
+    conda:
+        "envs/blast.yaml"
     shell:
         "gzip -d -c {input} >| {params.virus_fasta} "
         "&& makeblastdb -dbtype nucl "
@@ -85,9 +87,10 @@ rule blast_against_known_viruses:
         "data/processed/{sample}_blast_results.tsv"
     params:
         db_name="data/blast/virus_blastdb" # createde upstream, should be global?
+    conda:
+        "envs/blast.yaml"
     shell:
-        "module load BLAST "
-        "&& blastn -db {params.db_name} "
+        "blastn -db {params.db_name} "
         "-outfmt 6 "
         "-query {input.contigs} "
         "-out {output}"
