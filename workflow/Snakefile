@@ -58,11 +58,17 @@ rule contig_assembly:
     script:
         "scripts/spades.py"
 
-rule make_known_virus_blastdb:
-    # adapted from https://github.com/EnvGen/snakemake-workflows/blob/master/bio/ngs/rules/quality_control/internal_standards.rules
+rule download_virus_genomes:
     input:
         HTTP.remote("https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.1.genomic.fna.gz"),
-        # described here https://ftp.ncbi.nlm.nih.gov/refseq/release/README
+    output:
+        "data/raw/viral_genomes.fasta"
+    shell:
+        "gzip -d -c {input} >| {output}"
+
+rule make_known_virus_blastdb:
+    input:
+        "data/raw/viral_genomes.fasta"
     params:
         db_prefix="data/blast/virus_blastdb",  # used in downstream rule, should be a global?
         virus_fasta="data/blast/all_known_viruses.fasta"
@@ -71,8 +77,7 @@ rule make_known_virus_blastdb:
     conda:
         "envs/blast.yaml"
     shell:
-        "gzip -d -c {input} >| {params.virus_fasta} "
-        "&& makeblastdb -dbtype nucl "
+        "makeblastdb -dbtype nucl "
         "-parse_seqids "
         "-input_type fasta "
         "-in {params.virus_fasta} "
@@ -95,13 +100,13 @@ rule blast_against_known_viruses:
         "-query {input.contigs} "
         "-out {output}"
 
-rule pORF_finding:
-    input:
-        "data/interim/{sample}_nonhost_contigs.fasta"
-    output:
-        "data/processed/{sample}_orf.fasta"
-    conda:
-        "envs/orfipy.yaml"
-    shell:
-        "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
+# rule pORF_finding:
+    # input:
+        # "data/interim/{sample}_nonhost_contigs.fasta"
+    # output:
+        # "data/processed/{sample}_orf.fasta"
+    # conda:
+        # "envs/orfipy.yaml"
+    # shell:
+        # "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir data/output/"
 
