@@ -1,13 +1,8 @@
 import re
 from typing import Literal
 from pathlib import Path
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
-HTTP = HTTPRemoteProvider()
 
 configfile: "input.yaml"
-include: "rules/0_download_rnaseq_data.smk"
-include: "rules/1_download_genome.smk"
 
 def input_file_validation(sample, paired_end: Literal["1", "2"]):
     """given a sample name specified at the top-level, i.e., at the
@@ -21,7 +16,7 @@ def input_file_validation(sample, paired_end: Literal["1", "2"]):
         fq, = fqs
     except ValueError:
         print(f"Could not find paired end file R{paired_end} for sample {sample}. "
-              f"Assuming this is a SRA accesion number...")
+              f"Assuming this is a SRA accession number...")
         return str(data_dir/f"{sample}_{paired_end}.fastq")
     return str(fq)
 
@@ -29,6 +24,9 @@ rule all:
     input:
         "data/processed/{}_orf.fasta".format(config["sample"]),
         "data/processed/{}_blast_results.tsv".format(config["sample"])
+
+include: "rules/download_from_sequence_read_archives.smk"
+include: "rules/download_human_genome.smk"
 
 rule star_double_ended:
     input:
@@ -58,13 +56,7 @@ rule contig_assembly:
     script:
         "scripts/spades.py"
 
-rule download_virus_genomes:
-    input:
-        HTTP.remote("https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.1.genomic.fna.gz"),
-    output:
-        "data/raw/viral_genomes.fasta"
-    shell:
-        "gzip -d -c {input} >| {output}"
+include: "rules/download_viral_genomes.smk"
 
 rule make_known_virus_blastdb:
     input:
@@ -84,7 +76,6 @@ rule make_known_virus_blastdb:
         "-out {params.db_prefix} "
 
 rule blast_against_known_viruses:
-# should have make_known_viruse_blastdb as dependency
     input:
         "data/blast/virus_blastdb.nhr",
         contigs="data/interim/{sample}_nonhost_contigs.fasta"
