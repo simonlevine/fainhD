@@ -56,6 +56,41 @@ rule contig_assembly:
     script:
         "scripts/spades.py"
 
+include: "rules/download_viral_genomes.smk"
+
+rule make_known_virus_blastdb:
+    input:
+        "data/raw/viral_genomes.fasta"
+    params:
+        db_prefix="data/blast/virus_blastdb",  # used in downstream rule, should be a global?
+        virus_fasta="data/blast/all_known_viruses.fasta"
+    output:
+        expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsq"])
+    conda:
+        "envs/blast.yaml"
+    shell:
+        "makeblastdb -dbtype nucl "
+        "-parse_seqids "
+        "-input_type fasta "
+        "-in {params.virus_fasta} "
+        "-out {params.db_prefix} "
+
+rule blast_against_known_viruses:
+    input:
+        "data/blast/virus_blastdb.nhr",
+        contigs="data/interim/{sample}_nonhost_contigs.fasta"
+    output:
+        "data/processed/{sample}_blast_results.tsv"
+    params:
+        db_name="data/blast/virus_blastdb" # createde upstream, should be global?
+    conda:
+        "envs/blast.yaml"
+    shell:
+        "blastn -db {params.db_name} "
+        "-outfmt 6 "
+        "-query {input.contigs} "
+        "-out {output}"
+
 rule pORF_finding:
     input:
         "data/interim/{sample}_nonhost_contigs.fasta"
