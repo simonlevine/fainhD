@@ -1,6 +1,6 @@
 # Getting Started
 
-![](fainhD.png)
+![](../fainhD.png)
 
 
 ## Description
