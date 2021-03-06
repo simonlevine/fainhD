@@ -5,11 +5,13 @@
 
 Welcome to fainhD's documentation!
 ==================================
-
+.. image:: _static/fainhD.png
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+
+   getting_started.rst
 
 
 Indices and tables
