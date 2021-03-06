@@ -2,6 +2,7 @@
 
 ![](../fainhD.png)
 
+**f**iltering **a**nd **i**dentifying **n**on-**h**ost **D**NA pipeline for 03-713 Bioinformatics Practicum at Carnegie Mellon University, Spring 2021 by Jeremy Fisher, Simon Levine, Sid Reed and Tomas Matteson
 
 ## Description
 
@@ -10,7 +11,7 @@ fainhD does the following:
 - [x] Filter RNA-seq data to remove host sequences
 - [x] Assemble unknown sequences into contigs
 - [x] BLASTs virus sequences against known viruses
-- [x] Predicts functional ORFs in viral sequences --> `data/processed/{your_sample}_orf.fasta`
+- [x] Predicts functional ORFs in viral sequences
 - [x] Searches for structural elements in virus sequences
 
 ## Installation
@@ -60,4 +61,4 @@ This would run the pipeline on the HPV-positive experiment under the accession n
 
 ## Final Outputs
 
-All outputs are specified in `workflow/Snakefile`.
+All outputs are specified in `workflow/Snakefile` and detailed in §Under the Hood.
