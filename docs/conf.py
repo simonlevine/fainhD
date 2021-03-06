@@ -32,7 +32,7 @@ release = '1.0'
 # ones.
 # extensions = [
 # ]
-import myst_parser
+# import myst_parser
 extensions = ['myst_parser']
 
 
