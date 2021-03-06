@@ -11,7 +11,7 @@ Welcome to fainhD's documentation!
    :caption: Contents:
 
 
-   getting_started.rst
+   getting_started.md
 
 
 Indices and tables
