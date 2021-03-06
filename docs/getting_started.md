@@ -1,4 +1,6 @@
-fainhD does the following:
+# Getting Started
+
+## fainhD does the following:
 
 - [x] Filter RNA-seq data to remove host sequences
 - [x] Assemble unknown sequences into contigs
