@@ -1,0 +1,7 @@
+# Dependencies to render the documentation, **not** to run 
+# the pipeline. Software dependencies should be handled by 
+# Snakemake for the sake of reproducibility 
+
+Sphinx==3.5.2
+sphinx-rtd-theme==0.5.1
+myst-parser==0.13.5
