@@ -62,8 +62,8 @@ rule make_known_virus_blastdb:
     input:
         "data/raw/viral_genomes.fasta"
     params:
-        db_prefix="data/blast/virus_blastdb",  # used in downstream rule, should be a global?
-        virus_fasta="data/blast/all_known_viruses.fasta"
+        db_prefix="./data/blast/virus_blastdb",  # used in downstream rule, should be a global?
+        virus_fasta="./data/blast/all_known_viruses.fasta"
     output:
         expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsq"])
     conda:
