@@ -5,12 +5,12 @@
 
 ## Description
 
-fainhD does the following
+fainhD does the following:
 
 - [x] Filter RNA-seq data to remove host sequences
 - [x] Assemble unknown sequences into contigs
 - [x] BLASTs virus sequences against known viruses
-- [x] Predicts functional ORFs in viral sequences
+- [x] Predicts functional ORFs in viral sequences --> `data/processed/{your_sample}_orf.fasta`
 - [x] Searches for structural elements in virus sequences
 
 ## Installation
@@ -19,7 +19,7 @@ Please refer to [Snakemake's installation instructions](https://snakemake.readth
 
 Then, clone this repository and run as follows:
 
-## To run
+## To Run
 After cloning, `cd` into this repository. Change the `input.yaml` to refer to the proper dataset (as described below). Then, invoke (with, for example, two cores):
 ```bash
 snakemake --use-conda -j2 
@@ -28,6 +28,14 @@ snakemake --use-conda -j2
 To use an HPC, an example job script is supplied at `run.job`:
 ```bash
 sbatch run.job
+```
+
+## Dry Run
+
+To verify the Snakemake DAG is properly constructed:
+
+```bash
+snakemake -n 
 ```
 
 ## Using custom data
@@ -49,3 +57,7 @@ sample: SRR8250770
 ```
 
 This would run the pipeline on the HPV-positive experiment under the accession number `SRR8250770`
+
+## Final Outputs
+
+All outputs are specified in `workflow/Snakefile`.
