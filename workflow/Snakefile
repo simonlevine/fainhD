@@ -1,4 +1,5 @@
 import re
+import csv
 from typing import Literal
 from pathlib import Path
 
@@ -23,7 +24,7 @@ def input_file_validation(sample, paired_end: Literal["1", "2"]):
 rule all:
     input:
         "data/processed/{}_orf.fasta".format(config["sample"]),
-        "data/processed/{}_blast_results.tsv".format(config["sample"])
+        "data/processed/{}_blast_results.csv".format(config["sample"])
 
 include: "rules/download_from_sequence_read_archives.smk"
 include: "rules/download_human_genome.smk"
@@ -90,6 +91,21 @@ rule blast_against_known_viruses:
         "-outfmt 6 "
         "-query {input.contigs} "
         "-out {output}"
+
+rule convert_blast_to_csv_with_header:
+    input:
+        "data/processed/{sample}_blast_results.tsv"
+    output:
+        "data/processed/{sample}_blast_results.csv"
+    run:
+        cols = ["qseqid", "sseqid", "pident", "length", "mismatch", "gapopen",
+                "qstart", "qend", "sstart", "send", "evalue", "bitscore"] 
+        with open(input[0]) as fin, open(output[0], "wt") as fout:
+            tsv_reader = csv.reader(fin, delimiter="\t")
+            csv_writer = csv.DictWriter(fout, fieldnames=cols)
+            csv_writer.writeheader()
+            for row in tsv_reader:
+                csv_writer.writerow(dict(zip(cols, row)))
 
 rule pORF_finding:
     input:
