@@ -36,7 +36,7 @@ sbatch run.job
 Only paired-end read are supported. If those data are available locally (e.g., if they were downloaded before-hand), put them in the `data/raw/reads` folder and specify the library name in the `input.yaml` file. For example, if the read files were "foo_R1.fastq" and "foo_R2.fastq.fastq" and specify the sample name as:
 
 ```yaml
-sample: library
+sample: foo
 ```
 
 ### Sequence Read Archive
