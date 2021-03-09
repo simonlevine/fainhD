@@ -56,3 +56,8 @@ rule pORF_finding:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
 ```
+
+## Structural Inference
+
+### Algorithm
+### Snakemake Rule
