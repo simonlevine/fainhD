@@ -23,7 +23,7 @@ We employ Snakemake to build a directed acyclic graph of tasks to execute stepwi
 ## Functional ORF Prediction: Orfipy
 
 ### Algorithm
-Aho–Corasick string-searching:
+Orfipy is based on Aho–Corasick string-searching:
 
 1. Construct a trie out of input patterns.
 2. Construct suffix and output links in Breadth First Order.
@@ -60,4 +60,34 @@ rule pORF_finding:
 ## Structural Inference
 
 ### Algorithm
+
+We use rnaSPAdes based on the original SPAdes:
+
+1. Assembly graph construction (multi-sized de Bruijn graph)
+   i. aggregates biread information into distance histograms, among others.
+2. *k*-bimer adjustment
+   i. derives accurate distance estimates between k-mers in the genome (edges in the assembly graph) using joint analysis of such distance histograms
+3. Construct paired assembly graph
+4. Contig construction
+   i. Construct DNA sequences of contigs and the mapping of reads to contigs
+
+Further Reading:
+- https://academic.oup.com/gigascience/article/8/9/giz100/5559527
+- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3342519/#s035
+
 ### Snakemake Rule
+
+```
+rule contig_assembly:
+    input: 
+        "data/interim/{sample}_nonhost_R1.fastq",
+        "data/interim/{sample}_nonhost_R2.fastq"
+    output:
+        "data/interim/{sample}_nonhost_contigs.fasta"
+    params:
+        workdir="data/interim/{sample}_spades_workdir"
+    conda:
+        "envs/spades.yaml"
+    script:
+        "scripts/spades.py"
+```
