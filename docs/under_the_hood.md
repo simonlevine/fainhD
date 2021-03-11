@@ -172,9 +172,6 @@ rule pORF_finding:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
 ```
-
-## Structural Inference
-
 ### Algorithm
 
 We use rnaSPAdes based on the original SPAdes:
@@ -206,4 +203,44 @@ rule contig_assembly:
         "envs/spades.yaml"
     script:
         "scripts/spades.py"
+```
+
+
+## Structural Inference: Inferal
+
+### Algorithm
+
+Infernal works by querying a covariance model database and performing multiple sequence alignments between the models in that database and your input sequence. Each discovered structural RNA family has 1 structural covariance model, generated from many seed alignments that can all be found on Rfam.
+
+Rfam has around 3500 structural RNA families, and more are constantly being added (which can also be done by building CMs from sequence on Infernal). A covariance model is a specialized type of stochastic contact free grammar, related to a profile Hidden Markov Model. The difference being (at a very high level), that in profile HMMs each nucleotide at each position is independent, but in CMs the nucleotides are dependent upon each other.
+The actual explanation is a lot more complicated, and involves knowledge of Mixture Dirichlet priors, an extended discussion on which can be found in Chapter 5 of Infernal's manual.
+How do we use it?
+
+First we download the whole Rfam database as a covariance model database, and then we run Infernal on our fasta file and cm database. For each sequence in our FASTA, the input sequence is compared against all the CMs in the database, and based on pre-calibrated features from Rfam, if a significant hit is reported, the position and identity of that hit in the sequence is returned.
+
+Infernal considers overlapping sequences, so we can have the case where from positions 0-100 we have RNA family 1 and from 80-120 we have RNA family 2, etc. 
+
+Infernal must match on known covariance models, as it is essientially a very complicated multiple sequence alignment, so never before seen RNA structures must be characterized and added to the database before Infernal can report finding them.
+
+### Snakemake Rule
+
+```
+rule structural_prediction:
+    input:
+        query_fasta="data/interim/{sample}_viral_contigs.fasta",
+        rfam_database="data/raw/rfam/Rfam.cm"
+    output:
+        tblout="data/processed/{sample}_structural_predictions.tblout",
+        cmscan="data/processed/{sample}_structural_predictions.cmscan"
+    conda:
+        "envs/infernal.yaml"
+    threads:
+        12
+    shell:
+        "cmscan --rfam --cut_ga --nohmmonly "
+        "--cpu {threads} "
+        "--tblout {output.tblout} " 
+        "{input.rfam_database} "
+        "{input.query_fasta} "
+        "> {output.cmscan}"
 ```
