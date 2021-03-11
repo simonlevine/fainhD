@@ -1,14 +1,32 @@
 # Under The Hood
 
 ## Snakemake
-We employ Snakemake to build a directed acyclic graph of tasks to execute stepwise.
 
-![](../dag_graph.png)
+We employ Snakemake to build a directed acyclic graph of tasks to execute stepwise.
 
 ## RNA-Seq Filtering: STAR
 
 ### Algorithm
+STAR operates on an indexed genome (specifically, a suffix array), against which subsequences of a `fasta` are queried. For a given query, the longest subsequence that matches a location in the genome is stored as a "seed". These seeds are extended, but they need not match precisely. Because mismatches are allowed, many locations in the genome may "align" to a given query. All such alignments that are allowed are scored and, ultimately, only the best alignment is recorded.
+
 ### Snakemake Rule
+```
+rule star_double_ended:
+    input:
+        rules.download_genome.output["completion_flag"],
+        reference_genome_dir=rules.download_genome.output[0],
+        fq1 = lambda wildcards: input_file_validation(wildcards.sample, "1"),
+        fq2 = lambda wildcards: input_file_validation(wildcards.sample, "2")
+    output:
+        "data/interim/{sample}_nonhost_R1.fastq",
+        "data/interim/{sample}_nonhost_R2.fastq"
+    conda:
+        "envs/star.yaml"
+    threads:
+        12
+    script:
+        "scripts/star.py"
+```
 
 ## Contig Assembly: SPADES
 
