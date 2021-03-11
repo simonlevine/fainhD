@@ -2,7 +2,13 @@
 
 ## Snakemake
 
-We employ Snakemake to build a directed acyclic graph of tasks to execute stepwise.
+We employ Snakemake as our pipeline management tool. Inspired by GNU make, Snakemake takes, as input, a desired output file name; it then produces a graph of tasks or "rules" to produce this output file. Finally, it schedules the execution of these tasks in an efficient manner, appropriate to the compute environment. For example, it can run locally on a single thread or, just as easily, it can dispatch jobs (i.e., rules) to different nodes in a compute cluster.
+
+It should be noted that Snakemake provides a best-in-class solution to computational reproducibility. By running with the `--use-conda` flag, Snakemake will use the conda package manager to automatically determine an appropriate installation for the pipeline's software dependencies. Because the pipeline strictly requires certain versions of dependant software (particularly `STAR`), this invocation method is highly recommended.
+
+Further reproducibility is allowed by the integration of singularity, which can be invoked with the `--singularity` flag. Singularity is an operating system-level virtualization solution. It can protect against a variety of issues such as misconfigured environment variables or bugs in non-linux versions of bioinformatics tools. Note that containerization is somewhat advanced. We recommend it, albeit not so strongly as we do the use of conda.
+
+What follows is a description of the major rules in the fainhD pipeline.
 
 ## RNA-Seq Filtering: STAR
 
@@ -216,7 +222,7 @@ How do we use it? First we download the whole Rfam database as a covariance mode
 
 Infernal considers overlapping sequences, so we can have the case where from positions 0-100 we have RNA family 1 and from 80-120 we have RNA family 2, etc. 
 
-Infernal must match on known covariance models, as it is essientially a very complicated multiple sequence alignment, so never before seen RNA structures must be characterized and added to the database before Infernal can report finding them.
+Infernal must match on known covariance models, as it is essentially a very complicated multiple sequence alignment, so never before seen RNA structures must be characterized and added to the database before Infernal can report finding them.
 
 ### Snakemake Rule
 
