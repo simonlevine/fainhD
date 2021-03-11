@@ -1,9 +1,0 @@
-channels:
- - r
- - conda-forge
- - bioconda
-dependencies:
- - r-base=4.0.3
- - tidyverse
- - bioconductor-biostrings
- - bioconductor-rfarm

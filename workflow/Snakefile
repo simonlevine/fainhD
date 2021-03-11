@@ -25,8 +25,9 @@ csample = config["sample"]
 rule all:
     input:
         "data/processed/{}_orf.fasta".format(csample),
-        "data/processed/{}_blast_results.csv".format(csample),
-        "data/processed/{}_structural_predictions.csv".format(csample)
+        "data/processed/{}_blast_results.tsv".format(csample),
+        "data/processed/{}_structural_predictions.tblout".format(csample),
+        # "data/processed/{}_structural_predictions.csv".format(csample)
 
 include: "rules/download_from_sequence_read_archives.smk"
 include: "rules/download_human_genome.smk"
@@ -42,7 +43,8 @@ rule star_double_ended:
         "data/interim/{sample}_nonhost_R2.fastq"
     conda:
         "envs/star.yaml"
-    threads: 12
+    threads:
+        12
     script:
         "scripts/star.py"
 
@@ -119,12 +121,34 @@ rule pORF_finding:
     shell:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
+rule filter_out_nonhits:
+    input:
+        "data/processed/{sample}_blast_results.tsv",
+        "data/interim/{sample}_nonhost_contigs.fasta",
+    output:
+        "data/interim/{sample}_viral_contigs.fasta"
+    conda:
+        "envs/biopython.yaml"
+    script:
+        "scripts/filter_out_non_blast_hits.py"
+
+include: "rules/download_rfam.smk"
+
 rule structural_prediction:
     input:
-        "data/interim/{sample}_nonhost_contigs.fasta"
+        query_fasta="data/interim/{sample}_viral_contigs.fasta",
+        rfam_database="data/raw/rfam/Rfam.cm"
     output:
-        "data/processed/{sample}_structural_predictions.csv"
+        tblout="data/processed/{sample}_structural_predictions.tblout",
+        cmscan="data/processed/{sample}_structural_predictions.cmscan"
     conda:
-        "envs/rfarm.yaml"
-    script:
-        "scripts/structural_predictions.R"
+        "envs/infernal.yaml"
+    threads:
+        12
+    shell:
+        "cmscan --rfam --cut_ga --nohmmonly "
+        "--cpu {threads} "
+        "--tblout {output.tblout} " 
+        "{input.rfam_database} "
+        "{input.query_fasta} "
+        "> {output.cmscan}"
