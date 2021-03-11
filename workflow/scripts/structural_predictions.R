@@ -1,11 +1,11 @@
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-if (!requireNamespace("tidyverse", quietly = TRUE))
-	install.packages("tidyverse")
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+    # install.packages("BiocManager", repos='http://cran.us.r-project.org')
+# if (!requireNamespace("tidyverse", quietly = TRUE))
+	# install.packages("tidyverse", repos='http://cran.us.r-project.org')
 # The following initializes usage of Bioc devel
-BiocManager::install(version='devel')
-BiocManager::install("rfaRm")
-BiocManager::install("Biostrings")
+# BiocManager::install(version='devel')
+# BiocManager::install("rfaRm")
+# BiocManager::install("Biostrings")
 
 library(tidyverse)
 library(rfaRm)
