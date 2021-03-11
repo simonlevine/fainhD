@@ -30,7 +30,7 @@ Useful intermediary files are available in the `data/processed` directory, inclu
 
 Please refer to [Snakemake's installation instructions](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html), as Snakemake is the only dependency. It will, in turn, handle the pipelines software and data dependencies (besides the `fastq` files themselves).
 
-Note that you may need to run ```pip install ftputil```.
+Note that you may need to run ```pip install ftputil``` if you plan to use remote files (as is the default).
 
 Then, clone this repository and run as follows:
 
