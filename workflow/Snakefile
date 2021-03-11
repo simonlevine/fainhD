@@ -21,10 +21,12 @@ def input_file_validation(sample, paired_end: Literal["1", "2"]):
         return str(data_dir/f"{sample}_{paired_end}.fastq")
     return str(fq)
 
+csample = config["sample"]
 rule all:
     input:
-        "data/processed/{}_orf.fasta".format(config["sample"]),
-        "data/processed/{}_blast_results.csv".format(config["sample"])
+        "data/processed/{}_orf.fasta".format(csample),
+        "data/processed/{}_blast_results.csv".format(csample),
+        "data/processed/{}_structural_predictions.csv".format(csample)
 
 include: "rules/download_from_sequence_read_archives.smk"
 include: "rules/download_human_genome.smk"
@@ -117,3 +119,12 @@ rule pORF_finding:
     shell:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
+rule structural_prediction:
+    input:
+        "data/interim/{sample}_nonhost_contigs.fasta"
+    output:
+        "data/processed/{sample}_structural_predictions.csv"
+    conda:
+        "envs/rfarm.yaml"
+    script:
+        "scripts/structural_predictions.R"
