@@ -34,9 +34,107 @@ rule star_double_ended:
 ### Snakemake Rule
 
 ## Alignment to Known Viruses: BLASTn
+After you have isolated reads from your data you suspect are viruses you want to be able to see if your suspected viral reads are part of a known virus.
+So a BLAST search of your suspected viral contigs against all known human viruses is preformed so you can see if any of your contigs are similar to known viruses.
+If not it may be that a novel virus is present in your data or the contig is not actually a virus but an human or transposons sequence (among other possibilities).
+It is also possible your virus has certain similar genes or motifs to a known virus but is still different enough to be considered novel.
 
 ### Algorithm
+The input is a query sequence and a set of search sequences called the database, the output is the similarity of the input to every sequence in the output and associated statistics.
+To grossly oversimplify, the query sequence is chopped up into equally sized substrings which can individually be matched against sequences in the database.
+
+BLASTn uses a heuristic version of the Smith-Waterman algorithm for local sequence alignment, intended to increase the speed of searching queries against a database.
+1. Filter low-complexity regions from the query sequence
+1. Chop query sequence into k-mers
+1. Match and score each unique k-mer againt the database
+1. Only keep matched k-mers with a score above the threshold
+1. Exactly match each kept k-mer against the database
+1. Preform a local alignment in both directions around each exact match k-mer
+1. Keep any high scoring local alignments and statistically validate those matches
+
+Further Reading
+- [Having a BLAST with bioinformatics (and avoiding BLASTphemy)](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2001-2-10-reviews2002#Sec7)
+- [wikipedia](https://en.wikipedia.org/wiki/BLAST)
+- [video overview](https://www.youtube.com/watch?v=LlnMtI2Sg4g)
+- [original paper](https://www.sciencedirect.com/science/article/pii/S0022283605803602?via%3Dihub)
+
 ### Snakemake Rule
+First a local blast database of all known viruses must be created.
+So a fasta file of all known __complete__ viral genomes is downloaded from NCBI (specifically [this file](https://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.1.1.genomic.fna.gz)).
+This file is downloaded and then the command `makeblastdb` is used to make a blast database (the 5 `*.n*` files in the `ext` list).
+Now any query can be blasted against this database, which contains all known complete human viral genomes (~9000 as of March 2021).
+
+```
+rule make_known_virus_blastdb:
+    input:
+        "data/raw/viral_genomes.fasta"
+    params:
+        db_prefix="data/blast/virus_blastdb",  # used in downstream rule, should be a global?
+        virus_fasta='data/raw/viral_genomes.fasta'
+    output:
+        expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsq"])
+    conda:
+        "envs/blast.yaml"
+    shell:
+        "makeblastdb -dbtype nucl "
+        "-parse_seqids "
+        "-input_type fasta "
+        "-in {params.virus_fasta} "
+        "-out {params.db_prefix} "
+```
+
+Now that the blast database is made we can blast each individual contig against the database to see which viruses it is most similar to using Smith-Waterman local alignment.
+The `-outfmt 6` flag is described in the `blastn -h` help page, but it produces a tsv file with every hit from the given contig against the database.
+Note that there may be many low quality hits since `blastn` is not filtering the output, this is left to the user to parse as different users will be looking for different answers in their blast results.
+
+```
+rule blast_against_known_viruses:
+    input:
+        "data/blast/virus_blastdb.nhr",
+        contigs="data/interim/{sample}_nonhost_contigs.fasta"
+    output:
+        "data/processed/{sample}_blast_results.tsv"
+    params:
+        db_name="data/blast/virus_blastdb" # createde upstream, should be global?
+    conda:
+        "envs/blast.yaml"
+    shell:
+        "blastn -db {params.db_name} "
+        "-outfmt 6 "
+        "-query {input.contigs} "
+        "-out {output}"
+```
+
+The .tsv output of `blastn` is parsed in to an easier to parse .csv for each input sample to `data/processed/{sample}_blast_results.tsv`.
+The most important columns are
+- `qseqid` The fasta header of the suspected viral contig input
+- `sseqid` The fasta header of the known virus it matched to
+- `pident` The percent identity of the query (qseqid) that matched the subject (sseqid)
+- `evalue` Statistical evaluation of whether this match is spurious, see [here](https://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-1.html#head4) for details
+
+You can also look online or on the `blastn` man page for more details about the outputs and their meaning.
+
+```
+rule convert_blast_to_csv_with_header:
+    input:
+        "data/processed/{sample}_blast_results.tsv"
+    output:
+        "data/processed/{sample}_blast_results.csv"
+    run:
+        cols = ["qseqid", "sseqid", "pident", "length", "mismatch", "gapopen",
+                "qstart", "qend", "sstart", "send", "evalue", "bitscore"]
+        with open(input[0]) as fin, open(output[0], "wt") as fout:
+            tsv_reader = csv.reader(fin, delimiter="\t")
+            csv_writer = csv.DictWriter(fout, fieldnames=cols)
+            csv_writer.writeheader()
+            for row in tsv_reader:
+                csv_writer.writerow(dict(zip(cols, row)))
+```
+
+If you want all results in a single file you can simply run the following in the main project directory.
+```
+$ cat data/processed/*_blast_results.csv >| all_blast_results.csv
+```
 
 ## Functional ORF Prediction: Orfipy
 
@@ -58,7 +156,7 @@ Complexity:
 Futher Reading:
 - https://github.com/urmi-21/orfipy
 - https://iq.opengenus.org/aho-corasick-algorithm
-  
+
 ### Snakemake Rule
 
 We output a final `.fasta` file per the Snakemake rule:
@@ -97,7 +195,7 @@ Further Reading:
 
 ```
 rule contig_assembly:
-    input: 
+    input:
         "data/interim/{sample}_nonhost_R1.fastq",
         "data/interim/{sample}_nonhost_R2.fastq"
     output:
