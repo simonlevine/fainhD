@@ -202,41 +202,8 @@ rule pORF_finding:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
 ```
-### Algorithm
 
-We use rnaSPAdes based on the original SPAdes:
-
-1. Assembly graph construction (multi-sized de Bruijn graph)
-   i. aggregates biread information into distance histograms, among others.
-2. *k*-bimer adjustment
-   i. derives accurate distance estimates between k-mers in the genome (edges in the assembly graph) using joint analysis of such distance histograms
-3. Construct paired assembly graph
-4. Contig construction
-   i. Construct DNA sequences of contigs and the mapping of reads to contigs
-
-Further Reading:
-- https://academic.oup.com/gigascience/article/8/9/giz100/5559527
-- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3342519/#s035
-
-### Snakemake Rule
-
-```
-rule contig_assembly:
-    input:
-        "data/interim/{sample}_nonhost_R1.fastq",
-        "data/interim/{sample}_nonhost_R2.fastq"
-    output:
-        "data/interim/{sample}_nonhost_contigs.fasta"
-    params:
-        workdir="data/interim/{sample}_spades_workdir"
-    conda:
-        "envs/spades.yaml"
-    script:
-        "scripts/spades.py"
-```
-
-
-## Structural Inference: Inferal
+## Structural Inference: Infernal
 
 ### Algorithm
 
@@ -244,9 +211,8 @@ Infernal works by querying a covariance model database and performing multiple s
 
 Rfam has around 3500 structural RNA families, and more are constantly being added (which can also be done by building CMs from sequence on Infernal). A covariance model is a specialized type of stochastic contact free grammar, related to a profile Hidden Markov Model. The difference being (at a very high level), that in profile HMMs each nucleotide at each position is independent, but in CMs the nucleotides are dependent upon each other.
 The actual explanation is a lot more complicated, and involves knowledge of Mixture Dirichlet priors, an extended discussion on which can be found in Chapter 5 of Infernal's manual.
-How do we use it?
 
-First we download the whole Rfam database as a covariance model database, and then we run Infernal on our fasta file and cm database. For each sequence in our FASTA, the input sequence is compared against all the CMs in the database, and based on pre-calibrated features from Rfam, if a significant hit is reported, the position and identity of that hit in the sequence is returned.
+How do we use it? First we download the whole Rfam database as a covariance model database, and then we run Infernal on our fasta file and cm database. For each sequence in our FASTA, the input sequence is compared against all the CMs in the database, and based on pre-calibrated features from Rfam, if a significant hit is reported, the position and identity of that hit in the sequence is returned.
 
 Infernal considers overlapping sequences, so we can have the case where from positions 0-100 we have RNA family 1 and from 80-120 we have RNA family 2, etc. 
 
