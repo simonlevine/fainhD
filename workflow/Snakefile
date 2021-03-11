@@ -21,13 +21,9 @@ def input_file_validation(sample, paired_end: Literal["1", "2"]):
         return str(data_dir/f"{sample}_{paired_end}.fastq")
     return str(fq)
 
-csample = config["sample"]
 rule all:
     input:
-        "data/processed/{}_orf.fasta".format(csample),
-        "data/processed/{}_blast_results.tsv".format(csample),
-        "data/processed/{}_structural_predictions.tblout".format(csample),
-        # "data/processed/{}_structural_predictions.csv".format(csample)
+        "reports/{}.json".format(config["sample"])
 
 include: "rules/download_from_sequence_read_archives.smk"
 include: "rules/download_human_genome.smk"
@@ -113,7 +109,7 @@ rule convert_blast_to_csv_with_header:
 
 rule pORF_finding:
     input:
-        "data/interim/{sample}_nonhost_contigs.fasta"
+        "data/interim/{sample}_viral_contigs.fasta"
     output:
         "data/processed/{sample}_orf.fasta"
     conda:
@@ -152,3 +148,17 @@ rule structural_prediction:
         "{input.rfam_database} "
         "{input.query_fasta} "
         "> {output.cmscan}"
+
+rule report:
+    input:
+        "data/processed/{sample}_structural_predictions.tblout",
+        "data/processed/{sample}_blast_results.csv",
+        "data/interim/{sample}_viral_contigs.fasta",
+        "data/processed/{sample}_orf.fasta"
+    output:
+        "reports/{sample}.json"
+    conda:
+        "envs/biopython.yaml"
+    script:
+        "scripts/report.py"
+    
