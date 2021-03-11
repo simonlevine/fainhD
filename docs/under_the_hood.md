@@ -2,7 +2,13 @@
 
 ## Snakemake
 
-We employ Snakemake to build a directed acyclic graph of tasks to execute stepwise.
+We employ Snakemake as our pipeline management tool. Inspired by GNU make, Snakemake takes, as input, a desired output file name; it then produces a graph of tasks or "rules" to produce this output file. Finally, it schedules the execution of these tasks in an efficient manner, appropriate to the compute environment. For example, it can run locally on a single thread or, just as easily, it can dispatch jobs (i.e., rules) to different nodes in a compute cluster.
+
+It should be noted that Snakemake provides a best-in-class solution to computational reproducibility. By running with the `--use-conda` flag, Snakemake will use the conda package manager to automatically determine an appropriate installation for the pipeline's software dependencies. Because the pipeline strictly requires certain versions of dependant software (particularly `STAR`), this invocation method is highly recommended.
+
+Further reproducibility is allowed by the integration of singularity, which can be invoked with the `--singularity` flag. Singularity is an operating system-level virtualization solution. It can protect against a variety of issues such as misconfigured environment variables or bugs in non-linux versions of bioinformatics tools. Note that containerization is somewhat advanced. We recommend it, albeit not so strongly as we do the use of conda.
+
+What follows is a description of the major rules in the fainhD pipeline.
 
 ## RNA-Seq Filtering: STAR
 
@@ -202,41 +208,8 @@ rule pORF_finding:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
 ```
-### Algorithm
 
-We use rnaSPAdes based on the original SPAdes:
-
-1. Assembly graph construction (multi-sized de Bruijn graph)
-   i. aggregates biread information into distance histograms, among others.
-2. *k*-bimer adjustment
-   i. derives accurate distance estimates between k-mers in the genome (edges in the assembly graph) using joint analysis of such distance histograms
-3. Construct paired assembly graph
-4. Contig construction
-   i. Construct DNA sequences of contigs and the mapping of reads to contigs
-
-Further Reading:
-- https://academic.oup.com/gigascience/article/8/9/giz100/5559527
-- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3342519/#s035
-
-### Snakemake Rule
-
-```
-rule contig_assembly:
-    input:
-        "data/interim/{sample}_nonhost_R1.fastq",
-        "data/interim/{sample}_nonhost_R2.fastq"
-    output:
-        "data/interim/{sample}_nonhost_contigs.fasta"
-    params:
-        workdir="data/interim/{sample}_spades_workdir"
-    conda:
-        "envs/spades.yaml"
-    script:
-        "scripts/spades.py"
-```
-
-
-## Structural Inference: Inferal
+## Structural Inference: Infernal
 
 ### Algorithm
 
@@ -244,13 +217,12 @@ Infernal works by querying a covariance model database and performing multiple s
 
 Rfam has around 3500 structural RNA families, and more are constantly being added (which can also be done by building CMs from sequence on Infernal). A covariance model is a specialized type of stochastic contact free grammar, related to a profile Hidden Markov Model. The difference being (at a very high level), that in profile HMMs each nucleotide at each position is independent, but in CMs the nucleotides are dependent upon each other.
 The actual explanation is a lot more complicated, and involves knowledge of Mixture Dirichlet priors, an extended discussion on which can be found in Chapter 5 of Infernal's manual.
-How do we use it?
 
-First we download the whole Rfam database as a covariance model database, and then we run Infernal on our fasta file and cm database. For each sequence in our FASTA, the input sequence is compared against all the CMs in the database, and based on pre-calibrated features from Rfam, if a significant hit is reported, the position and identity of that hit in the sequence is returned.
+How do we use it? First we download the whole Rfam database as a covariance model database, and then we run Infernal on our fasta file and cm database. For each sequence in our FASTA, the input sequence is compared against all the CMs in the database, and based on pre-calibrated features from Rfam, if a significant hit is reported, the position and identity of that hit in the sequence is returned.
 
 Infernal considers overlapping sequences, so we can have the case where from positions 0-100 we have RNA family 1 and from 80-120 we have RNA family 2, etc. 
 
-Infernal must match on known covariance models, as it is essientially a very complicated multiple sequence alignment, so never before seen RNA structures must be characterized and added to the database before Infernal can report finding them.
+Infernal must match on known covariance models, as it is essentially a very complicated multiple sequence alignment, so never before seen RNA structures must be characterized and added to the database before Infernal can report finding them.
 
 ### Snakemake Rule
 
