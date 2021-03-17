@@ -34,8 +34,8 @@ rule star_pe:
         fq1 = lambda wildcards: input_file_discovery(wildcards.sample, "1"),
         fq2 = lambda wildcards: input_file_discovery(wildcards.sample, "2")
     output:
-        unmapped_reads_R1="data/interim/star/{sample}/Unmapped.out.mate1",
-        unmapped_reads_R2="data/interim/star/{sample}/Unmapped.out.mate2"
+        "data/interim/star/{sample}/Unmapped.out.mate1",
+        "data/interim/star/{sample}/Unmapped.out.mate2"
     params:
         index="data/raw/reference_genome",
         extra="--outReadsUnmapped Fastx"
@@ -46,10 +46,21 @@ rule star_pe:
     wrapper:
         "0.72.0/bio/star/align"
 
+rule star_pe_add_postfix:
+    input:
+        "data/interim/star/{sample}/Unmapped.out.mate1",
+        "data/interim/star/{sample}/Unmapped.out.mate2"
+    output:
+        "data/interim/star/{sample}/Unmapped.out.mate1.fastq",
+        "data/interim/star/{sample}/Unmapped.out.mate2.fastq"
+    run:
+        for fin, fout in zip(input, output):
+            shell("mv {fin} {fout}")
+
 rule contig_assembly_pe:
     input: 
-        rules.star_pe.output["unmapped_reads_R1"],
-        rules.star_pe.output["unmapped_reads_R2"]
+        "data/interim/star/{sample}/Unmapped.out.mate1.fastq",
+        "data/interim/star/{sample}/Unmapped.out.mate2.fastq"
     output:
         "data/interim/{sample}_nonhost_contigs.fasta"
     params:
