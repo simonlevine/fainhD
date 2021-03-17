@@ -28,30 +28,35 @@ def input_file_discovery(sample, paired_end: Literal["1", "2"]):
 include: "rules/download_from_sequence_read_archives.smk"
 include: "rules/download_human_genome.smk"
 
-rule star_pair_ended:
+rule star_pe:
     input:
         rules.download_genome.output["completion_flag"],
-        reference_genome_dir=rules.download_genome.output[0],
         fq1 = lambda wildcards: input_file_discovery(wildcards.sample, "1"),
         fq2 = lambda wildcards: input_file_discovery(wildcards.sample, "2")
     output:
-        "data/interim/{sample}_nonhost_R1.fastq",
-        "data/interim/{sample}_nonhost_R2.fastq"
-    conda:
-        "envs/star.yaml"
+        outdir="data/interim/star/{sample}",
+        unmapped_reads_R1="data/interim/star/{sample}/Unmapped.out.mate1",
+        unmapped_reads_R2="data/interim/star/{sample}/Unmapped.out.mate2"
+    params:
+        index="data/raw/reference_genome",
+        extra="--outReadsUnmapped Fastx"
     threads:
         12
-    script:
-        "scripts/star.py"
+    conda:
+        "envs/star.yaml"
+    wrapper:
+        "0.72.0/bio/star/align"
 
-rule contig_assembly_pair_ended:
+rule contig_assembly_pe:
     input: 
-        "data/interim/{sample}_nonhost_R1.fastq",
-        "data/interim/{sample}_nonhost_R2.fastq"
+        rules.star_se.output["unmapped_reads_R1"],
+        rules.star_se.output["unmapped_reads_R2"]
     output:
         "data/interim/{sample}_nonhost_contigs.fasta"
     params:
-        workdir="data/interim/{sample}_spades_workdir"
+        sequencing="pair-ended"
+    threads:
+        12
     conda:
         "envs/spades.yaml"
     script:

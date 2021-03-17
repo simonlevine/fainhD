@@ -16,31 +16,34 @@ def input_file_discovery(sample):
 
 include: "rules/download_human_genome.smk"
 
-rule star_single_ended:
+rule star_se:
     input:
         rules.download_genome.output["completion_flag"],
-        reference_genome_dir=rules.download_genome.output[0],
-        fq=lambda wildcards: input_file_discovery(wildcards.sample)
+        fq1=lambda wildcards: input_file_discovery(wildcards.sample)
     output:
-        "data/interim/{sample}_nonhost.fastq",
+        outdir="data/interim/star/{sample}",
+        unmapped_reads="data/interim/star/{sample}/Unmapped.out.mate1"
+    params:
+        index="data/raw/reference_genome",
+        extra="--outReadsUnmapped Fastx"
     conda:
         "envs/star.yaml"
-    threads:
-        12
-    script:
-        "scripts/star_se.py"
+    wrapper:
+        "0.72.0/bio/star/align"
 
-rule contig_assembly_single_ended:
+rule contig_assembly_se:
     input: 
-        "data/interim/{sample}_nonhost.fastq",
+        rules.star_se.output["unmapped_reads"]
     output:
         "data/interim/{sample}_nonhost_contigs.fasta"
     params:
-        workdir="data/interim/{sample}_spades_workdir"
+        sequencing="single-ended"
+    threads:
+        12
     conda:
         "envs/spades.yaml"
     script:
-        "scripts/spades_se.py"
+        "scripts/spades.py"
 
 # all tasks downstream of contig assembly are shared
 include : "rules/shared.smk"

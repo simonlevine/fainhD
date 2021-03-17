@@ -21,7 +21,7 @@ rule make_known_virus_blastdb:
     output:
         expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsq"])
     conda:
-        "envs/blast.yaml"
+        "../envs/blast.yaml"
     shell:
         "makeblastdb -dbtype nucl "
         "-parse_seqids "
@@ -38,7 +38,7 @@ rule blast_against_known_viruses:
     params:
         db_name="data/blast/virus_blastdb"
     conda:
-        "envs/blast.yaml"
+        "../envs/blast.yaml"
     shell:
         "blastn -db {params.db_name} "
         "-outfmt 6 "
@@ -66,7 +66,7 @@ rule pORF_finding:
     output:
         "data/processed/{sample}_orf.fasta"
     conda:
-        "envs/orfipy.yaml"
+        "../envs/orfipy.yaml"
     shell:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
@@ -77,7 +77,7 @@ rule filter_out_nonhits:
     output:
         "data/interim/{sample}_viral_contigs.fasta"
     conda:
-        "envs/biopython.yaml"
+        "../envs/biopython.yaml"
     script:
         "scripts/filter_out_non_blast_hits.py"
 
@@ -91,7 +91,7 @@ rule structural_prediction:
         tblout="data/processed/{sample}_structural_predictions.tblout",
         cmscan="data/processed/{sample}_structural_predictions.cmscan"
     conda:
-        "envs/infernal.yaml"
+        "../envs/infernal.yaml"
     threads:
         12
     shell:
@@ -111,7 +111,7 @@ rule report:
     output:
         "reports/{sample}.json"
     conda:
-        "envs/biopython.yaml"
+        "../envs/biopython.yaml"
     script:
         "scripts/report.py"
     
