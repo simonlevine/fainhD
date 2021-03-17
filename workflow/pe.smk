@@ -34,7 +34,6 @@ rule star_pe:
         fq1 = lambda wildcards: input_file_discovery(wildcards.sample, "1"),
         fq2 = lambda wildcards: input_file_discovery(wildcards.sample, "2")
     output:
-        outdir="data/interim/star/{sample}",
         unmapped_reads_R1="data/interim/star/{sample}/Unmapped.out.mate1",
         unmapped_reads_R2="data/interim/star/{sample}/Unmapped.out.mate2"
     params:

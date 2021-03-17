@@ -21,7 +21,6 @@ rule star_se:
         rules.download_genome.output["completion_flag"],
         fq1=lambda wildcards: input_file_discovery(wildcards.sample)
     output:
-        outdir="data/interim/star/{sample}",
         unmapped_reads="data/interim/star/{sample}/Unmapped.out.mate1"
     params:
         index="data/raw/reference_genome",
