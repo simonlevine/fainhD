@@ -1,9 +1,0 @@
-#!/bin/bash
-
-#SBATCH --job-name=fainD
-#SBATCH --cpus-per-task=12
-#SBATCH --time=00:30:00
-
-set -x
-cd $PROJECT/bioinformatics-project
-snakemake --use-conda -j12 all

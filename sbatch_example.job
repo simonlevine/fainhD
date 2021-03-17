@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#SBATCH --job-name=fainD
+#SBATCH -n 14
+#SBATCH --mem=64GB
+#SBATCH --time=01:00:00
+
+set -x
+cd $PROJECT/fainhD
+snakemake --use-conda -j12 -s workflow/pe.smk
