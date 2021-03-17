@@ -7,6 +7,6 @@ rule download_rfam_db:
     output:
         "data/raw/rfam/Rfam.cm"
     conda:
-        "envs/infernal.yaml"
+        "../envs/infernal.yaml"
     shell:
         "zcat {input} > {output} && cmpress {output}"
