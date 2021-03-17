@@ -21,7 +21,7 @@ rule star_se:
         rules.download_genome.output["completion_flag"],
         fq1=lambda wildcards: input_file_discovery(wildcards.sample)
     output:
-        unmapped_reads="data/interim/star/{sample}/Unmapped.out.mate1"
+        "data/interim/star/{sample}/Unmapped.out.mate1"
     params:
         index="data/raw/reference_genome",
         extra="--outReadsUnmapped Fastx"
@@ -30,9 +30,17 @@ rule star_se:
     wrapper:
         "0.72.0/bio/star/align"
 
+rule star_se_add_postfix:
+    input:
+        "data/interim/star/{sample}/Unmapped.out.mate1"
+    output:
+        "data/interim/star/{sample}/Unmapped.out.mate1.fastq"
+    shell:
+        "mv {input} {output}"
+
 rule contig_assembly_se:
     input: 
-        rules.star_se.output["unmapped_reads"]
+        "data/interim/star/{sample}/Unmapped.out.mate1.fastq"
     output:
         "data/interim/{sample}_nonhost_contigs.fasta"
     params:
