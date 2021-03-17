@@ -9,7 +9,6 @@ including:
 
 """
 
-
 include: "download_viral_genomes.smk"
 
 rule make_known_virus_blastdb:
@@ -79,7 +78,7 @@ rule filter_out_nonhits:
     conda:
         "../envs/biopython.yaml"
     script:
-        "scripts/filter_out_non_blast_hits.py"
+        "../scripts/filter_out_non_blast_hits.py"
 
 include: "download_rfam.smk"
 
@@ -113,5 +112,5 @@ rule report:
     conda:
         "../envs/biopython.yaml"
     script:
-        "scripts/report.py"
+        "../scripts/report.py"
     
