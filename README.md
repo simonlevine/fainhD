@@ -29,6 +29,7 @@ Useful intermediary files are available in the `data/processed` directory, inclu
 ## Installation
 
 We organize the pipeline using Snakemake.
+
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.6.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
 
 Please refer to [Snakemake's installation instructions](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html), as Snakemake is the only dependency. It will, in turn, handle the pipelines software and data dependencies (besides the `fastq` files themselves).
