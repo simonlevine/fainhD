@@ -4,10 +4,10 @@ from snakemake.shell import shell
 
 if snakemake.params["sequencing"] in ["se", "single-ended"]:
     fq1, = snakemake.input
-    cmd = "--s1 {fq1}"
+    cmd = f"--s1 {fq1}"
 elif snakemake.params["sequencing"] in ["pe", "pair-ended"]:
     fq1, fq2 = snakemake.input
-    read_spec = "--pe1-1 {fq1} --pe-2 {fq2}"
+    read_spec = f"--pe1-1 {fq1} --pe-2 {fq2}"
 else:
     raise ValueError("Please specify a read chemistry! ('se' or 'pe')")
 
