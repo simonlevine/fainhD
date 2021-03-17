@@ -28,7 +28,7 @@ rule all:
 include: "rules/download_from_sequence_read_archives.smk"
 include: "rules/download_human_genome.smk"
 
-rule star_double_ended:
+rule star_pair_ended:
     input:
         rules.download_genome.output["completion_flag"],
         reference_genome_dir=rules.download_genome.output[0],
@@ -44,7 +44,7 @@ rule star_double_ended:
     script:
         "scripts/star.py"
 
-rule contig_assembly:
+rule contig_assembly_pair_ended:
     input: 
         "data/interim/{sample}_nonhost_R1.fastq",
         "data/interim/{sample}_nonhost_R2.fastq"
