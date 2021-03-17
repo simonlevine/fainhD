@@ -49,8 +49,8 @@ rule star_pe:
 
 rule contig_assembly_pe:
     input: 
-        rules.star_se.output["unmapped_reads_R1"],
-        rules.star_se.output["unmapped_reads_R2"]
+        rules.star_pe.output["unmapped_reads_R1"],
+        rules.star_pe.output["unmapped_reads_R2"]
     output:
         "data/interim/{sample}_nonhost_contigs.fasta"
     params:
