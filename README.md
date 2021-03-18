@@ -39,12 +39,14 @@ Note that you may need to run ```pip install ftputil``` if you plan to use remot
 Then, clone this repository and run as follows:
 
 ## To run
-After cloning, `cd` into this repository. Change the `input.yaml` to refer to the proper dataset (as described below). Then, invoke (with, for example, twelve cores):
+After cloning, `cd` into this repository. Change the `input.yaml` to refer to the proper dataset (as described below). There are two pipelines: one for single-ended sequencing (`workflow/pe.smk`) and one for pair-ended sequencing (`workflow/se.smk`). Depending on the sequencing reaction, invoke as follows (with, for example, twelve cores):
 ```bash
-snakemake --use-conda -j12 
+snakemake --use-conda -j12 -s workflow/pe.smk
+# or...
+snakemake --use-conda -j12 -s workflow/se.smk
 ```
 
-To use an HPC, an example job script is supplied at `run.job`:
+To use an HPC, an example job script (for pair-ended datasets) is supplied at `run.job`:
 ```bash
 sbatch run.job
 ```
@@ -76,11 +78,11 @@ Snakemake is built to produce target files from source files. By specifying a `s
 This makes it simple to analyze multiple libraries simultaneously. For example, to analyze the SRA experiments `SRR8250770` and `SRR8250765` (which are HPV-positive and HPV-negative, respectively):
 
 ```bash
-snakemake --use-conda -j12 reports/{SRR8250770,SRR8250765}.json
+snakemake --use-conda -j12 -s workflow/pe.smk reports/{SRR8250770,SRR8250765}.json
 ```
 
 It shall be noted that this is simply a bash expansion. The shell actually runs the following 
 
 ```bash
-snakemake --use-conda -j12 reports/SRR8250770.json reports/SRR8250765.json
+snakemake --use-conda -j12 workflow/pe.smk reports/SRR8250770.json reports/SRR8250765.json
 ```

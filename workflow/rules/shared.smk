@@ -1,74 +1,26 @@
-import re
-import csv
-from typing import Literal
-from pathlib import Path
+"""
+all logic that is shared between paired-end and single-end sequencing,
+including:
 
-configfile: "input.yaml"
+- viral identification (blastn)
+- ORF identification (orfipy)
+- structural prediction (infernal)
+- report generation
 
-def input_file_validation(sample, paired_end: Literal["1", "2"]):
-    """given a sample name specified at the top-level, i.e., at the
-    command line, determine the corresponding read files. If the
-    file is not found in `data/raw/reads`, assume that this is a
-    SRA accession number and download"""
-    data_dir = Path("data/raw/reads")
-    pat = r"^" + sample + r"_?R" + paired_end + r"_?\.(fastq|fq)(\.gz)?"
-    fqs = [fq for fq in data_dir.glob("*") if re.match(pat, fq.name)]
-    try:
-        fq, = fqs
-    except ValueError:
-        print(f"Could not find paired end file R{paired_end} for sample {sample}. "
-              f"Assuming this is a SRA accession number...")
-        return str(data_dir/f"{sample}_{paired_end}.fastq")
-    return str(fq)
+"""
 
-rule all:
-    input:
-        "reports/{}.json".format(config["sample"])
-
-include: "rules/download_from_sequence_read_archives.smk"
-include: "rules/download_human_genome.smk"
-
-rule star_double_ended:
-    input:
-        rules.download_genome.output["completion_flag"],
-        reference_genome_dir=rules.download_genome.output[0],
-        fq1 = lambda wildcards: input_file_validation(wildcards.sample, "1"),
-        fq2 = lambda wildcards: input_file_validation(wildcards.sample, "2")
-    output:
-        "data/interim/{sample}_nonhost_R1.fastq",
-        "data/interim/{sample}_nonhost_R2.fastq"
-    conda:
-        "envs/star.yaml"
-    threads:
-        12
-    script:
-        "scripts/star.py"
-
-rule contig_assembly:
-    input: 
-        "data/interim/{sample}_nonhost_R1.fastq",
-        "data/interim/{sample}_nonhost_R2.fastq"
-    output:
-        "data/interim/{sample}_nonhost_contigs.fasta"
-    params:
-        workdir="data/interim/{sample}_spades_workdir"
-    conda:
-        "envs/spades.yaml"
-    script:
-        "scripts/spades.py"
-
-include: "rules/download_viral_genomes.smk"
+include: "download_viral_genomes.smk"
 
 rule make_known_virus_blastdb:
     input:
         "data/raw/viral_genomes.fasta"
     params:
-        db_prefix="data/blast/virus_blastdb",  # used in downstream rule, should be a global?
+        db_prefix="data/blast/virus_blastdb",
         virus_fasta='data/raw/viral_genomes.fasta'
     output:
         expand("data/blast/virus_blastdb.{ext}", ext= ["nhr", "nin", "nog", "nsq"])
     conda:
-        "envs/blast.yaml"
+        "../envs/blast.yaml"
     shell:
         "makeblastdb -dbtype nucl "
         "-parse_seqids "
@@ -83,9 +35,9 @@ rule blast_against_known_viruses:
     output:
         "data/processed/{sample}_blast_results.tsv"
     params:
-        db_name="data/blast/virus_blastdb" # createde upstream, should be global?
+        db_name="data/blast/virus_blastdb"
     conda:
-        "envs/blast.yaml"
+        "../envs/blast.yaml"
     shell:
         "blastn -db {params.db_name} "
         "-outfmt 6 "
@@ -113,7 +65,7 @@ rule pORF_finding:
     output:
         "data/processed/{sample}_orf.fasta"
     conda:
-        "envs/orfipy.yaml"
+        "../envs/orfipy.yaml"
     shell:
         "orfipy {input} --rna {output} --min 10 --max 10000 --table 1 --outdir ."
 
@@ -124,11 +76,11 @@ rule filter_out_nonhits:
     output:
         "data/interim/{sample}_viral_contigs.fasta"
     conda:
-        "envs/biopython.yaml"
+        "../envs/biopython.yaml"
     script:
-        "scripts/filter_out_non_blast_hits.py"
+        "../scripts/filter_out_non_blast_hits.py"
 
-include: "rules/download_rfam.smk"
+include: "download_rfam.smk"
 
 rule structural_prediction:
     input:
@@ -138,7 +90,7 @@ rule structural_prediction:
         tblout="data/processed/{sample}_structural_predictions.tblout",
         cmscan="data/processed/{sample}_structural_predictions.cmscan"
     conda:
-        "envs/infernal.yaml"
+        "../envs/infernal.yaml"
     threads:
         12
     shell:
@@ -158,7 +110,7 @@ rule report:
     output:
         "reports/{sample}.json"
     conda:
-        "envs/biopython.yaml"
+        "../envs/biopython.yaml"
     script:
-        "scripts/report.py"
+        "../scripts/report.py"
     
