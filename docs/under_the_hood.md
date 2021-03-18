@@ -183,7 +183,7 @@ Orfipy is based on Aho–Corasick string-searching:
 4. If current character matches any of children then follow it otherwise follow the suffix link.
 5. At every node follow the output links to get patterns occurring till the current position.
 
-Complexity ($z$ is number of occurrences, $n$ is thetotal length of all patterns, and $m$ is the length of the text string.)
+Complexity ($z$ is number of occurrences, $n$ is the total length of all patterns, and $m$ is the length of the text string.)
 - Trie Contruction: $O(n)$
 - Suffix/Output Link Construction: $O(n)$
 - Searching: $O(m + z)$
