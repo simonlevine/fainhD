@@ -6,7 +6,7 @@ We employ Snakemake as our pipeline management tool. Inspired by GNU make, Snake
 
 It should be noted that Snakemake provides a best-in-class solution to computational reproducibility. By running with the `--use-conda` flag, Snakemake will use the conda package manager to automatically determine an appropriate installation for the pipeline's software dependencies. Because the pipeline strictly requires certain versions of dependant software (particularly `STAR`), this invocation method is highly recommended.
 
-Further reproducibility is allowed by the integration of singularity, which can be invoked with the `--singularity` flag. Singularity is an operating system-level virtualization solution. It can protect against a variety of issues such as misconfigured environment variables or bugs in non-linux versions of bioinformatics tools. Note that containerization is somewhat advanced. We recommend it, albeit not so strongly as we do the use of conda.
+Further reproducibility is allowed by the integration of singularity, which can be invoked with the `--singularity` flag. Singularity is an operating system-level virtualisation solution. It can protect against a variety of issues such as misconfigured environment variables or bugs in non-linux versions of bioinformatics tools. Note that containerization is somewhat advanced. We recommend it, albeit not so strongly as we do the use of conda.
 
 What follows is a description of the major rules in the fainhD pipeline.
 
@@ -41,9 +41,9 @@ rule star_double_ended:
 We use rnaSPAdes based on the original SPAdes:
 
 1. Assembly graph construction (multi-sized de Bruijn graph)
-   i. aggregates biread information into distance histograms, among others.
+   i. Aggregates biread information into distance histograms, among others.
 2. *k*-bimer adjustment
-   i. derives accurate distance estimates between k-mers in the genome (edges in the assembly graph) using joint analysis of such distance histograms
+   i. Derives accurate distance estimates between k-mers in the genome (edges in the assembly graph) using joint analysis of such distance histograms
 3. Construct paired assembly graph
 4. Contig construction
    i. Construct DNA sequences of contigs and the mapping of reads to contigs
@@ -56,7 +56,7 @@ Further Reading:
 
 ```
 rule contig_assembly:
-    input: 
+    input:
         "data/interim/{sample}_nonhost_R1.fastq",
         "data/interim/{sample}_nonhost_R2.fastq"
     output:
@@ -82,13 +82,14 @@ To grossly oversimplify, the query sequence is chopped up into equally sized sub
 BLASTn uses a heuristic version of the Smith-Waterman algorithm for local sequence alignment, intended to increase the speed of searching queries against a database.
 1. Filter low-complexity regions from the query sequence
 1. Chop query sequence into k-mers
-1. Match and score each unique k-mer againt the database
+1. Match and score each unique k-mer against the database
 1. Only keep matched k-mers with a score above the threshold
 1. Exactly match each kept k-mer against the database
 1. Preform a local alignment in both directions around each exact match k-mer
 1. Keep any high scoring local alignments and statistically validate those matches
 
 Further Reading
+- [Statistical Signfigance of BLAST](https://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-1.html)
 - [Having a BLAST with bioinformatics (and avoiding BLASTphemy)](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2001-2-10-reviews2002#Sec7)
 - [wikipedia](https://en.wikipedia.org/wiki/BLAST)
 - [video overview](https://www.youtube.com/watch?v=LlnMtI2Sg4g)
@@ -220,7 +221,7 @@ The actual explanation is a lot more complicated, and involves knowledge of Mixt
 
 How do we use it? First we download the whole Rfam database as a covariance model database, and then we run Infernal on our fasta file and cm database. For each sequence in our FASTA, the input sequence is compared against all the CMs in the database, and based on pre-calibrated features from Rfam, if a significant hit is reported, the position and identity of that hit in the sequence is returned.
 
-Infernal considers overlapping sequences, so we can have the case where from positions 0-100 we have RNA family 1 and from 80-120 we have RNA family 2, etc. 
+Infernal considers overlapping sequences, so we can have the case where from positions 0-100 we have RNA family 1 and from 80-120 we have RNA family 2, etc.
 
 Infernal must match on known covariance models, as it is essentially a very complicated multiple sequence alignment, so never before seen RNA structures must be characterized and added to the database before Infernal can report finding them.
 
@@ -241,7 +242,7 @@ rule structural_prediction:
     shell:
         "cmscan --rfam --cut_ga --nohmmonly "
         "--cpu {threads} "
-        "--tblout {output.tblout} " 
+        "--tblout {output.tblout} "
         "{input.rfam_database} "
         "{input.query_fasta} "
         "> {output.cmscan}"
